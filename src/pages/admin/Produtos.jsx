@@ -5,7 +5,7 @@ import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import Modal from '../../components/ui/Modal'
 import FormProduto from '../../components/product/FormProduto'
-import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight } from 'lucide-react'
+import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Search } from 'lucide-react'
 
 export default function AdminProdutos() {
   const [marcas, setMarcas] = useState([])
@@ -58,28 +58,38 @@ export default function AdminProdutos() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Produtos</h1>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="font-heading text-3xl font-bold text-ivory mb-2">
+            Produtos
+          </h1>
+          <div className="w-12 h-px bg-gradient-to-r from-gold/50 to-transparent" />
+        </div>
         <Button onClick={handleNew}>
           <Plus size={18} className="mr-2" />
           Novo Produto
         </Button>
       </div>
 
-      <div className="flex gap-4 mb-6">
-        <input
-          type="text"
-          placeholder="Buscar produto..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:border-gold flex-1"
-        />
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="relative flex-1">
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-ivory/30" />
+          <input
+            type="text"
+            placeholder="Buscar produto..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            className="input-luxury w-full pl-10"
+          />
+        </div>
         <select
           value={filtros.ativo === undefined ? '' : filtros.ativo.toString()}
           onChange={(e) => setFiltros({
             ativo: e.target.value === '' ? undefined : e.target.value === 'true'
           })}
-          className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:border-gold"
+          className="input-luxury min-w-[140px]"
         >
           <option value="">Todos</option>
           <option value="true">Ativos</option>
@@ -87,84 +97,116 @@ export default function AdminProdutos() {
         </select>
       </div>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-zinc-800">
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-400">Produto</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-400">Marca</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-400">Gênero</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-400">Preço</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-400">Tags</th>
-              <th className="text-left px-4 py-3 text-sm font-medium text-gray-400">Status</th>
-              <th className="text-right px-4 py-3 text-sm font-medium text-gray-400">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="7" className="px-4 py-8 text-center text-gray-400">Carregando...</td>
+      {/* Table */}
+      <div className="bg-noir-900/50 border border-noir-800 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-noir-800">
+                <th className="text-left px-6 py-4 font-accent text-xs uppercase tracking-wider text-ivory/50">
+                  Produto
+                </th>
+                <th className="text-left px-6 py-4 font-accent text-xs uppercase tracking-wider text-ivory/50">
+                  Marca
+                </th>
+                <th className="text-left px-6 py-4 font-accent text-xs uppercase tracking-wider text-ivory/50">
+                  Gênero
+                </th>
+                <th className="text-left px-6 py-4 font-accent text-xs uppercase tracking-wider text-ivory/50">
+                  Preço
+                </th>
+                <th className="text-left px-6 py-4 font-accent text-xs uppercase tracking-wider text-ivory/50">
+                  Tags
+                </th>
+                <th className="text-left px-6 py-4 font-accent text-xs uppercase tracking-wider text-ivory/50">
+                  Status
+                </th>
+                <th className="text-right px-6 py-4 font-accent text-xs uppercase tracking-wider text-ivory/50">
+                  Ações
+                </th>
               </tr>
-            ) : produtosFiltrados.length === 0 ? (
-              <tr>
-                <td colSpan="7" className="px-4 py-8 text-center text-gray-500">Nenhum produto encontrado</td>
-              </tr>
-            ) : (
-              produtosFiltrados.map((produto) => (
-                <tr key={produto.id} className="border-b border-zinc-800 hover:bg-zinc-800/50">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      {produto.imagem_url ? (
-                        <img src={produto.imagem_url} alt="" className="h-10 w-10 rounded object-cover" />
-                      ) : (
-                        <div className="h-10 w-10 rounded bg-zinc-800 flex items-center justify-center text-gray-600 text-xs">IMG</div>
-                      )}
-                      <span>{produto.nome}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-gray-400">{produto.marcas?.nome || '-'}</td>
-                  <td className="px-4 py-3 text-gray-400 capitalize">{produto.genero}</td>
-                  <td className="px-4 py-3 text-gold font-medium">R$ {produto.preco.toFixed(2)}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-1">
-                      {produto.tags?.map(tag => (
-                        <Badge key={tag} variant="gold">{tag}</Badge>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant={produto.ativo ? 'success' : 'danger'}>
-                      {produto.ativo ? 'Ativo' : 'Inativo'}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => handleToggle(produto)}
-                        className="text-gray-400 hover:text-gold transition-colors"
-                        title={produto.ativo ? 'Inativar' : 'Ativar'}
-                      >
-                        {produto.ativo ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
-                      </button>
-                      <button
-                        onClick={() => handleEdit(produto)}
-                        className="text-gray-400 hover:text-blue-400 transition-colors"
-                      >
-                        <Pencil size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(produto.id)}
-                        className="text-gray-400 hover:text-red-400 transition-colors"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="px-6 py-12 text-center">
+                    <div className="w-8 h-8 border-2 border-gold/20 border-t-gold rounded-full animate-spin mx-auto" />
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : produtosFiltrados.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="px-6 py-12 text-center">
+                    <p className="text-ivory/30 italic">Nenhum produto encontrado</p>
+                  </td>
+                </tr>
+              ) : (
+                produtosFiltrados.map((produto) => (
+                  <tr
+                    key={produto.id}
+                    className="border-b border-noir-800/50 hover:bg-noir-800/30 transition-colors duration-200"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-4">
+                        {produto.imagem_url ? (
+                          <img
+                            src={produto.imagem_url}
+                            alt=""
+                            className="h-12 w-12 rounded-lg object-cover border border-noir-700"
+                          />
+                        ) : (
+                          <div className="h-12 w-12 rounded-lg bg-noir-800 flex items-center justify-center text-ivory/20 text-xs border border-noir-700">
+                            IMG
+                          </div>
+                        )}
+                        <span className="text-ivory font-medium">{produto.nome}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-ivory/50">{produto.marcas?.nome || '-'}</td>
+                    <td className="px-6 py-4 text-ivory/50 capitalize">{produto.genero}</td>
+                    <td className="px-6 py-4">
+                      <span className="price-tag">R$ {produto.preco.toFixed(2)}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-1 flex-wrap">
+                        {produto.tags?.map(tag => (
+                          <Badge key={tag} variant="gold">{tag}</Badge>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge variant={produto.ativo ? 'success' : 'danger'}>
+                        {produto.ativo ? 'Ativo' : 'Inativo'}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => handleToggle(produto)}
+                          className="w-8 h-8 rounded-lg border border-noir-700 flex items-center justify-center text-ivory/40 hover:text-gold hover:border-gold/30 transition-all duration-300"
+                          title={produto.ativo ? 'Inativar' : 'Ativar'}
+                        >
+                          {produto.ativo ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
+                        </button>
+                        <button
+                          onClick={() => handleEdit(produto)}
+                          className="w-8 h-8 rounded-lg border border-noir-700 flex items-center justify-center text-ivory/40 hover:text-gold hover:border-gold/30 transition-all duration-300"
+                        >
+                          <Pencil size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(produto.id)}
+                          className="w-8 h-8 rounded-lg border border-noir-700 flex items-center justify-center text-ivory/40 hover:text-wine hover:border-wine/30 transition-all duration-300"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <Modal

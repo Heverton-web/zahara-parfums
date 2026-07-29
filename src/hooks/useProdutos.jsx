@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { produtosMock, marcasMock } from '../data/mock'
+
+// Verificar se o Supabase está configurado
+const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && 
+  import.meta.env.VITE_SUPABASE_URL !== 'sua_url_aqui'
 
 export function useProdutos(filtros = {}) {
   const [produtos, setProdutos] = useState([])
@@ -12,6 +17,29 @@ export function useProdutos(filtros = {}) {
   async function fetchProdutos() {
     setLoading(true)
 
+    // Se Supabase não está configurado, usar dados mock
+    if (!isSupabaseConfigured) {
+      let filtered = [...produtosMock]
+
+      if (filtros.ativo !== undefined) {
+        filtered = filtered.filter(p => p.ativo === filtros.ativo)
+      }
+      if (filtros.genero) {
+        filtered = filtered.filter(p => p.genero === filtros.genero)
+      }
+      if (filtros.marca) {
+        filtered = filtered.filter(p => p.marca_id === filtros.marca)
+      }
+      if (filtros.tag) {
+        filtered = filtered.filter(p => p.tags?.includes(filtros.tag))
+      }
+
+      setProdutos(filtered)
+      setLoading(false)
+      return
+    }
+
+    // Caso contrário, buscar do Supabase
     let query = supabase
       .from('produtos')
       .select('*, marcas(id, nome, logo_url)')
@@ -47,6 +75,12 @@ export function useProdutos(filtros = {}) {
 }
 
 export async function fetchProdutoById(id) {
+  // Se Supabase não está configurado, usar dados mock
+  if (!isSupabaseConfigured) {
+    const produto = produtosMock.find(p => p.id === id)
+    return { data: produto || null, error: produto ? null : new Error('Produto não encontrado') }
+  }
+
   const { data, error } = await supabase
     .from('produtos')
     .select('*, marcas(id, nome, logo_url)')
@@ -95,4 +129,31 @@ export async function toggleProdutoAtivo(id, ativo) {
     .single()
 
   return { data, error }
+}
+
+// Função para buscar marcas
+export function useMarcas() {
+  const [marcas, setMarcas] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchMarcas()
+  }, [])
+
+  async function fetchMarcas() {
+    setLoading(true)
+
+    // Se Supabase não está configurado, usar dados mock
+    if (!isSupabaseConfigured) {
+      setMarcas(marcasMock)
+      setLoading(false)
+      return
+    }
+
+    const { data } = await supabase.from('marcas').select('*').order('nome')
+    if (data) setMarcas(data)
+    setLoading(false)
+  }
+
+  return { marcas, loading, refetch: fetchMarcas }
 }

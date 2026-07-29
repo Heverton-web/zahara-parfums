@@ -79,7 +79,7 @@ export default function Dashboard() {
       devices.data.forEach(item => {
         devs[item.dispositivo] = (devs[item.dispositivo] || 0) + 1
       })
-      const colors = ['#C9A84C', '#4CAF50', '#E53935', '#A0A0A0']
+      const colors = ['#C9A84C', '#7a1c42', '#065f46', '#A0A0A0']
       setDispositivos(
         Object.entries(devs).map(([name, value], i) => ({
           name, value, color: colors[i % colors.length]
@@ -88,90 +88,150 @@ export default function Dashboard() {
     }
   }
 
+  const statsCards = [
+    {
+      label: 'Produtos',
+      value: `${stats.produtosAtivos}/${stats.totalProdutos}`,
+      sublabel: 'ativos / total',
+      icon: Package,
+      color: 'text-gold',
+    },
+    {
+      label: 'Views Hoje',
+      value: stats.viewsHoje,
+      icon: Eye,
+      color: 'text-gold',
+    },
+    {
+      label: 'Cliques Hoje',
+      value: stats.cliquesHoje,
+      icon: MousePointerClick,
+      color: 'text-emerald-500',
+    },
+    {
+      label: 'Taxa Conversão',
+      value: `${stats.viewsHoje > 0 ? ((stats.cliquesHoje / stats.viewsHoje) * 100).toFixed(1) : 0}%`,
+      icon: TrendingUp,
+      color: 'text-gold',
+    },
+  ]
+
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card>
-          <Package className="text-gold mb-2" size={24} />
-          <p className="text-gray-400 text-sm">Produtos</p>
-          <p className="text-2xl font-bold">{stats.produtosAtivos}/{stats.totalProdutos}</p>
-          <p className="text-xs text-gray-500">ativos / total</p>
-        </Card>
-        <Card>
-          <Eye className="text-blue-400 mb-2" size={24} />
-          <p className="text-gray-400 text-sm">Views Hoje</p>
-          <p className="text-2xl font-bold">{stats.viewsHoje}</p>
-        </Card>
-        <Card>
-          <MousePointerClick className="text-green-400 mb-2" size={24} />
-          <p className="text-gray-400 text-sm">Cliques Hoje</p>
-          <p className="text-2xl font-bold">{stats.cliquesHoje}</p>
-        </Card>
-        <Card>
-          <TrendingUp className="text-gold mb-2" size={24} />
-          <p className="text-gray-400 text-sm">Taxa Conversão</p>
-          <p className="text-2xl font-bold">
-            {stats.viewsHoje > 0 ? ((stats.cliquesHoje / stats.viewsHoje) * 100).toFixed(1) : 0}%
-          </p>
-        </Card>
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="font-heading text-3xl font-bold text-ivory mb-2">
+          Dashboard
+        </h1>
+        <div className="w-12 h-px bg-gradient-to-r from-gold/50 to-transparent" />
       </div>
 
+      {/* Stats grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {statsCards.map((stat, index) => (
+          <Card key={index} className="group hover:border-gold/30 transition-all duration-300">
+            <stat.icon className={`${stat.color} mb-3 group-hover:scale-110 transition-transform duration-300`} size={24} />
+            <p className="text-ivory/50 text-sm font-accent uppercase tracking-wider mb-1">
+              {stat.label}
+            </p>
+            <p className="text-2xl font-bold text-ivory">
+              {stat.value}
+            </p>
+            {stat.sublabel && (
+              <p className="text-xs text-ivory/30 mt-1">{stat.sublabel}</p>
+            )}
+          </Card>
+        ))}
+      </div>
+
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <h2 className="text-lg font-semibold mb-4">Views vs Cliques (7 dias)</h2>
+          <h2 className="font-heading text-lg font-bold text-ivory mb-4">
+            Views vs Cliques
+          </h2>
+          <p className="text-ivory/40 text-xs mb-4">Últimos 7 dias</p>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={viewsChart}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" />
-              <XAxis dataKey="dia" stroke="#A0A0A0" tick={{ fontSize: 12 }} />
-              <YAxis stroke="#A0A0A0" />
-              <Tooltip contentStyle={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }} />
-              <Bar dataKey="views" fill="#C9A84C" name="Views" />
-              <Bar dataKey="cliques" fill="#4CAF50" name="Cliques" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+              <XAxis dataKey="dia" stroke="#666" tick={{ fontSize: 11 }} />
+              <YAxis stroke="#666" />
+              <Tooltip
+                contentStyle={{
+                  background: '#1a1a1a',
+                  border: '1px solid rgba(201, 168, 76, 0.2)',
+                  borderRadius: '8px',
+                }}
+              />
+              <Bar dataKey="views" fill="#C9A84C" name="Views" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="cliques" fill="#065f46" name="Cliques" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
 
         <Card>
-          <h2 className="text-lg font-semibold mb-4">Top 5 Produtos (7 dias)</h2>
+          <h2 className="font-heading text-lg font-bold text-ivory mb-4">
+            Top 5 Produtos
+          </h2>
+          <p className="text-ivory/40 text-xs mb-4">Últimos 7 dias</p>
           {topProdutos.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={topProdutos} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2A" />
-                <XAxis type="number" stroke="#A0A0A0" />
-                <YAxis dataKey="name" type="category" width={120} stroke="#A0A0A0" tick={{ fontSize: 12 }} />
-                <Tooltip contentStyle={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }} />
-                <Bar dataKey="value" fill="#C9A84C" name="Views" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+                <XAxis type="number" stroke="#666" />
+                <YAxis dataKey="name" type="category" width={120} stroke="#666" tick={{ fontSize: 11 }} />
+                <Tooltip
+                  contentStyle={{
+                    background: '#1a1a1a',
+                    border: '1px solid rgba(201, 168, 76, 0.2)',
+                    borderRadius: '8px',
+                  }}
+                />
+                <Bar dataKey="value" fill="#C9A84C" name="Views" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-gray-500 text-center py-8">Sem dados ainda</p>
+            <div className="flex items-center justify-center h-[250px]">
+              <p className="text-ivory/30 italic">Sem dados ainda</p>
+            </div>
           )}
         </Card>
 
-        <Card>
-          <h2 className="text-lg font-semibold mb-4">Dispositivos (30 dias)</h2>
+        <Card className="lg:col-span-2">
+          <h2 className="font-heading text-lg font-bold text-ivory mb-4">
+            Dispositivos
+          </h2>
+          <p className="text-ivory/40 text-xs mb-4">Últimos 30 dias</p>
           {dispositivos.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={dispositivos}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                >
-                  {dispositivos.map((entry, index) => (
-                    <Cell key={index} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }} />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="flex items-center justify-center">
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={dispositivos}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {dispositivos.map((entry, index) => (
+                      <Cell key={index} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      background: '#1a1a1a',
+                      border: '1px solid rgba(201, 168, 76, 0.2)',
+                      borderRadius: '8px',
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           ) : (
-            <p className="text-gray-500 text-center py-8">Sem dados ainda</p>
+            <div className="flex items-center justify-center h-[300px]">
+              <p className="text-ivory/30 italic">Sem dados ainda</p>
+            </div>
           )}
         </Card>
       </div>
