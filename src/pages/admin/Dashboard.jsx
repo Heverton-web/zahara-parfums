@@ -119,48 +119,49 @@ export default function Dashboard() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="font-heading text-3xl font-bold text-ivory mb-2">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold text-ivory mb-2">
           Dashboard
         </h1>
-        <div className="w-12 h-px bg-gradient-to-r from-gold/50 to-transparent" />
+        <div className="w-8 sm:w-12 h-px bg-gradient-to-r from-gold/40 sm:from-gold/50 to-transparent" />
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         {statsCards.map((stat, index) => (
           <Card key={index} className="group hover:border-gold/30 transition-all duration-300">
-            <stat.icon className={`${stat.color} mb-3 group-hover:scale-110 transition-transform duration-300`} size={24} />
-            <p className="text-ivory/50 text-sm font-accent uppercase tracking-wider mb-1">
+            <stat.icon className={`${stat.color} mb-2 sm:mb-3 group-hover:scale-110 transition-transform duration-300`} size={20} />
+            <p className="text-ivory/40 text-[10px] sm:text-sm font-accent uppercase tracking-wider mb-1">
               {stat.label}
             </p>
-            <p className="text-2xl font-bold text-ivory">
+            <p className="text-lg sm:text-2xl font-bold text-ivory">
               {stat.value}
             </p>
             {stat.sublabel && (
-              <p className="text-xs text-ivory/30 mt-1">{stat.sublabel}</p>
+              <p className="text-[10px] sm:text-xs text-ivory/25 sm:text-ivory/30 mt-1">{stat.sublabel}</p>
             )}
           </Card>
         ))}
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card>
-          <h2 className="font-heading text-lg font-bold text-ivory mb-4">
+          <h2 className="font-heading text-base sm:text-lg font-bold text-ivory mb-3 sm:mb-4">
             Views vs Cliques
           </h2>
-          <p className="text-ivory/40 text-xs mb-4">Últimos 7 dias</p>
-          <ResponsiveContainer width="100%" height={250}>
+          <p className="text-ivory/30 sm:text-ivory/40 text-[10px] sm:text-xs mb-3 sm:mb-4">Últimos 7 dias</p>
+          <ResponsiveContainer width="100%" height={200}>
             <BarChart data={viewsChart}>
               <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
-              <XAxis dataKey="dia" stroke="#666" tick={{ fontSize: 11 }} />
-              <YAxis stroke="#666" />
+              <XAxis dataKey="dia" stroke="#666" tick={{ fontSize: 10 }} />
+              <YAxis stroke="#666" tick={{ fontSize: 10 }} />
               <Tooltip
                 contentStyle={{
                   background: '#1a1a1a',
                   border: '1px solid rgba(201, 168, 76, 0.2)',
                   borderRadius: '8px',
+                  fontSize: '12px',
                 }}
               />
               <Bar dataKey="views" fill="#C9A84C" name="Views" radius={[4, 4, 0, 0]} />
@@ -170,49 +171,51 @@ export default function Dashboard() {
         </Card>
 
         <Card>
-          <h2 className="font-heading text-lg font-bold text-ivory mb-4">
+          <h2 className="font-heading text-base sm:text-lg font-bold text-ivory mb-3 sm:mb-4">
             Top 5 Produtos
           </h2>
-          <p className="text-ivory/40 text-xs mb-4">Últimos 7 dias</p>
+          <p className="text-ivory/30 sm:text-ivory/40 text-[10px] sm:text-xs mb-3 sm:mb-4">Últimos 7 dias</p>
           {topProdutos.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={200}>
               <BarChart data={topProdutos} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
-                <XAxis type="number" stroke="#666" />
-                <YAxis dataKey="name" type="category" width={120} stroke="#666" tick={{ fontSize: 11 }} />
+                <XAxis type="number" stroke="#666" tick={{ fontSize: 10 }} />
+                <YAxis dataKey="name" type="category" width={100} stroke="#666" tick={{ fontSize: 10 }} />
                 <Tooltip
                   contentStyle={{
                     background: '#1a1a1a',
                     border: '1px solid rgba(201, 168, 76, 0.2)',
                     borderRadius: '8px',
+                    fontSize: '12px',
                   }}
                 />
                 <Bar dataKey="value" fill="#C9A84C" name="Views" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="flex items-center justify-center h-[250px]">
-              <p className="text-ivory/30 italic">Sem dados ainda</p>
+            <div className="flex items-center justify-center h-[200px]">
+              <p className="text-ivory/25 sm:text-ivory/30 italic text-sm">Sem dados ainda</p>
             </div>
           )}
         </Card>
 
         <Card className="lg:col-span-2">
-          <h2 className="font-heading text-lg font-bold text-ivory mb-4">
+          <h2 className="font-heading text-base sm:text-lg font-bold text-ivory mb-3 sm:mb-4">
             Dispositivos
           </h2>
-          <p className="text-ivory/40 text-xs mb-4">Últimos 30 dias</p>
+          <p className="text-ivory/30 sm:text-ivory/40 text-[10px] sm:text-xs mb-3 sm:mb-4">Últimos 30 dias</p>
           {dispositivos.length > 0 ? (
             <div className="flex items-center justify-center">
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
                     data={dispositivos}
                     cx="50%"
                     cy="50%"
-                    outerRadius={100}
+                    outerRadius={80}
                     dataKey="value"
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    labelLine={false}
                   >
                     {dispositivos.map((entry, index) => (
                       <Cell key={index} fill={entry.color} />
@@ -223,14 +226,15 @@ export default function Dashboard() {
                       background: '#1a1a1a',
                       border: '1px solid rgba(201, 168, 76, 0.2)',
                       borderRadius: '8px',
+                      fontSize: '12px',
                     }}
                   />
                 </PieChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="flex items-center justify-center h-[300px]">
-              <p className="text-ivory/30 italic">Sem dados ainda</p>
+            <div className="flex items-center justify-center h-[250px]">
+              <p className="text-ivory/25 sm:text-ivory/30 italic text-sm">Sem dados ainda</p>
             </div>
           )}
         </Card>
