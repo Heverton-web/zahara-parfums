@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import Button from '../../components/ui/Button'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import Input from '../../components/ui/Input'
 import { Plus, Pencil, Trash2, MoreVertical } from 'lucide-react'
 import { marcasMock } from '../../data/mock'
@@ -14,13 +15,14 @@ export default function MarcasAdmin() {
   const [nome, setNome] = useState('')
   const [saving, setSaving] = useState(false)
   const [expandedCard, setExpandedCard] = useState(null)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [marcaToDelete, setMarcaToDelete] = useState(null)
 
   useEffect(() => {
     fetchMarcas()
   }, [])
 
   async function fetchMarcas() {
-    // Se Supabase não está configurado, usar mock
     const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && 
       import.meta.env.VITE_SUPABASE_URL !== 'sua_url_aqui'
     
@@ -48,49 +50,68 @@ export default function MarcasAdmin() {
     setExpandedCard(null)
   }
 
-  async function handleDelete(id) {
-    if (confirm('Excluir esta marca? Produtos ficarão sem marca.')) {
-      const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && 
-        import.meta.env.VITE_SUPABASE_URL !== 'sua_url_aqui'
-      
-      if (isSupabaseConfigured) {
-        await supabase.from('marcas').delete().eq('id', id)
-      }
-      setMarcas(marcas.filter(m => m.id !== id))
-    }
+  function handleDeleteClick(id) {
+    setMarcaToDelete(id)
+    setConfirmOpen(true)
     setExpandedCard(null)
+  }
+
+  async function handleDeleteConfirm() {
+    if (marcaToDelete) {
+      try {
+        const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && 
+          import.meta.env.VITE_SUPABASE_URL !== 'sua_url_aqui'
+        
+        if (isSupabaseConfigured) {
+          const { error } = await supabase.from('marcas').delete().eq('id', marcaToDelete)
+          if (error) throw error
+        }
+        fetchMarcas()
+      } catch (err) {
+        console.error('Erro ao deletar marca:', err)
+      }
+    }
+    setMarcaToDelete(null)
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
     setSaving(true)
 
-    const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && 
-      import.meta.env.VITE_SUPABASE_URL !== 'sua_url_aqui'
+    try {
+      const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && 
+        import.meta.env.VITE_SUPABASE_URL !== 'sua_url_aqui'
 
-    if (isSupabaseConfigured) {
-      if (marcaEditando) {
-        await supabase.from('marcas').update({ nome }).eq('id', marcaEditando.id)
-      } else {
-        await supabase.from('marcas').insert({ nome })
-      }
-    } else {
-      // Mock mode
-      if (marcaEditando) {
-        setMarcas(marcas.map(m => m.id === marcaEditando.id ? { ...m, nome } : m))
-      } else {
-        const newMarca = {
-          id: Date.now().toString(),
-          nome,
-          logo_url: null
+      if (isSupabaseConfigured) {
+        if (marcaEditando) {
+          const { error } = await supabase.from('marcas').update({ nome }).eq('id', marcaEditando.id)
+          if (error) throw error
+        } else {
+          const { error } = await supabase.from('marcas').insert({ nome })
+          if (error) throw error
         }
-        setMarcas([...marcas, newMarca])
+      } else {
+        if (marcaEditando) {
+          setMarcas(marcas.map(m => m.id === marcaEditando.id ? { ...m, nome } : m))
+        } else {
+          const newMarca = {
+            id: Date.now().toString(),
+            nome,
+            logo_url: null
+          }
+          setMarcas([...marcas, newMarca])
+        }
       }
-    }
 
-    setSaving(false)
-    setModalOpen(false)
-    fetchMarcas()
+      setSaving(false)
+      setModalOpen(false)
+      setMarcaEditando(null)
+      setNome('')
+      fetchMarcas()
+    } catch (err) {
+      console.error('Erro ao salvar marca:', err)
+      setSaving(false)
+    }
   }
 
   return (
@@ -111,7 +132,7 @@ export default function MarcasAdmin() {
 
       {/* Desktop Table */}
       <div 
-        className="hidden lg:block bg-noir-900/50 rounded-xl overflow-hidden"
+        className="hidden lg:block bg-noir-900 rounded-xl overflow-hidden"
         style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
       >
         <div className="overflow-x-auto">
@@ -143,7 +164,7 @@ export default function MarcasAdmin() {
                 marcas.map((marca) => (
                   <tr
                     key={marca.id}
-                    className="hover:bg-noir-800/20 transition-colors duration-200"
+                    className="hover:bg-noir-800 transition-colors duration-200"
                     style={{ borderBottom: '0.25px solid rgba(212, 175, 55, 0.1)' }}
                   >
                     <td className="px-5 py-3">
@@ -178,7 +199,7 @@ export default function MarcasAdmin() {
                           <Pencil size={14} />
                         </button>
                         <button
-                          onClick={() => handleDelete(marca.id)}
+                          onClick={() => handleDeleteClick(marca.id)}
                           className="w-7 h-7 rounded-lg flex items-center justify-center text-ivory/30 hover:text-wine transition-all duration-300"
                           style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
                         >
@@ -208,7 +229,7 @@ export default function MarcasAdmin() {
           marcas.map((marca) => (
             <div
               key={marca.id}
-              className="bg-noir-900/50 rounded-xl p-4"
+              className="bg-noir-900 rounded-xl p-4"
               style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
             >
               <div className="flex items-center gap-3">
@@ -255,14 +276,14 @@ export default function MarcasAdmin() {
                     >
                       <button
                         onClick={() => handleEdit(marca)}
-                        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-ivory/60 hover:text-gold hover:bg-noir-800/50 transition-all"
+                        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-ivory/60 hover:text-gold hover:bg-noir-800 transition-all"
                       >
                         <Pencil size={14} />
                         Editar
                       </button>
                       <button
-                        onClick={() => handleDelete(marca.id)}
-                        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-ivory/60 hover:text-wine hover:bg-noir-800/50 transition-all"
+                        onClick={() => handleDeleteClick(marca.id)}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-ivory/60 hover:text-wine hover:bg-noir-800 transition-all"
                       >
                         <Trash2 size={14} />
                         Excluir
@@ -276,41 +297,71 @@ export default function MarcasAdmin() {
         )}
       </div>
 
-      <Modal
-        isOpen={modalOpen}
-        onClose={() => { setModalOpen(false); setMarcaEditando(null) }}
-        title={marcaEditando ? 'Editar Marca' : 'Nova Marca'}
-      >
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-          <Input
-            label="Nome da Marca"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            placeholder="Ex: Amouage, Ajmal, Rasasi..."
-            required
-          />
+      <Modal isOpen={modalOpen} onClose={() => { setModalOpen(false); setMarcaEditando(null) }}>
+        <div className="mb-4">
+          <h3 className="font-heading text-lg font-semibold text-ivory">
+            {marcaEditando ? 'Editar Marca' : 'Nova Marca'}
+          </h3>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-[10px] text-ivory/40 uppercase tracking-wider mb-1.5 font-medium">
+              Nome da Marca
+            </label>
+            <input
+              type="text"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              placeholder="Ex: Amouage, Ajmal, Rasasi..."
+              required
+              className="w-full px-3 py-2.5 rounded-lg text-sm text-ivory placeholder-ivory/25 focus:outline-none transition-all"
+              style={{ 
+                backgroundColor: '#12121a',
+                border: '0.25px solid rgba(212, 175, 55, 0.08)'
+              }}
+              onFocus={(e) => e.target.style.borderColor = 'rgba(212, 175, 55, 0.3)'}
+              onBlur={(e) => e.target.style.borderColor = 'rgba(212, 175, 55, 0.08)'}
+            />
+          </div>
           <div className="flex gap-3 pt-2">
-            <Button type="submit" disabled={saving} className="flex-1 text-sm">
+            <button
+              type="button"
+              onClick={() => { setModalOpen(false); setMarcaEditando(null) }}
+              className="flex-1 px-4 py-2.5 rounded-xl text-ivory/50 hover:text-ivory/70 text-sm font-medium transition-all duration-200"
+              style={{ 
+                backgroundColor: '#12121a',
+                border: '0.25px solid rgba(212, 175, 55, 0.08)' 
+              }}
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={saving || !nome.trim()}
+              className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-gold to-gold-light text-noir-950 text-sm font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:from-gold-light hover:to-gold"
+            >
               {saving ? (
                 <span className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-noir-950/30 border-t-noir-950 rounded-full animate-spin" />
                   Salvando...
                 </span>
               ) : (
-                marcaEditando ? 'Salvar Alterações' : 'Criar Marca'
+                marcaEditando ? 'Salvar' : 'Criar Marca'
               )}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => { setModalOpen(false); setMarcaEditando(null) }}
-              className="text-sm"
-            >
-              Cancelar
-            </Button>
+            </button>
           </div>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => { setConfirmOpen(false); setMarcaToDelete(null) }}
+        onConfirm={handleDeleteConfirm}
+        title="Excluir Marca"
+        message="Tem certeza que deseja excluir esta marca? Produtos ficarão sem marca associada."
+        confirmText="Excluir"
+        variant="danger"
+      />
     </div>
   )
 }

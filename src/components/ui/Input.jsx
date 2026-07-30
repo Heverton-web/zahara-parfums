@@ -8,6 +8,7 @@ export default function Input({ label, error, className = '', ...props }) {
       )}
       <input
         className={`input-luxury ${error ? 'border-red-500/50' : ''} ${className}`}
+        style={{ backgroundColor: '#12121a', color: '#fdf9f0' }}
         {...props}
       />
       {error && <span className="text-xs text-red-400">{error}</span>}

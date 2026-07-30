@@ -1,14 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { produtosMock, marcasMock } from '../data/mock'
-
-// Verificar se o Supabase está configurado
-const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && 
-  import.meta.env.VITE_SUPABASE_URL !== 'sua_url_aqui'
 
 export function useProdutos(filtros = {}) {
   const [produtos, setProdutos] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     fetchProdutos()
@@ -16,15 +12,8 @@ export function useProdutos(filtros = {}) {
 
   async function fetchProdutos() {
     setLoading(true)
+    setError(null)
 
-    // Se Supabase não está configurado, usar dados mock
-    if (!isSupabaseConfigured) {
-      setProdutos(filterProdutos(produtosMock, filtros))
-      setLoading(false)
-      return
-    }
-
-    // Tentar buscar do Supabase, fallback para mock se der erro
     try {
       let query = supabase
         .from('produtos')
@@ -45,68 +34,36 @@ export function useProdutos(filtros = {}) {
 
       query = query.order('created_at', { ascending: false })
 
-      const { data, error } = await query
+      const { data, error: fetchError } = await query
 
-      if (error || !data || data.length === 0) {
-        // Fallback para dados mock
-        setProdutos(filterProdutos(produtosMock, filtros))
+      if (fetchError) {
+        console.error('Erro ao buscar produtos:', fetchError)
+        setError(fetchError.message)
+        setProdutos([])
       } else {
-        setProdutos(data)
+        setProdutos(data || [])
       }
     } catch (err) {
-      // Fallback para dados mock
-      setProdutos(filterProdutos(produtosMock, filtros))
+      console.error('Erro ao buscar produtos:', err)
+      setError(err.message)
+      setProdutos([])
     }
 
     setLoading(false)
   }
 
-  return { produtos, loading, refetch: fetchProdutos }
-}
-
-function filterProdutos(produtos, filtros) {
-  let filtered = [...produtos]
-
-  if (filtros.ativo !== undefined) {
-    filtered = filtered.filter(p => p.ativo === filtros.ativo)
-  }
-  if (filtros.genero) {
-    filtered = filtered.filter(p => p.genero === filtros.genero)
-  }
-  if (filtros.marca) {
-    filtered = filtered.filter(p => p.marca_id === filtros.marca)
-  }
-  if (filtros.tag) {
-    filtered = filtered.filter(p => p.tags?.includes(filtros.tag))
-  }
-
-  return filtered
+  return { produtos, loading, error, refetch: fetchProdutos }
 }
 
 export async function fetchProdutoById(id) {
-  // Se Supabase não está configurado, usar dados mock
-  if (!isSupabaseConfigured) {
-    const produto = produtosMock.find(p => p.id === id)
-    return { data: produto || null, error: produto ? null : new Error('Produto não encontrado') }
-  }
+  const { data, error } = await supabase
+    .from('produtos')
+    .select('*, marcas(id, nome, logo_url)')
+    .eq('id', id)
+    .single()
 
-  try {
-    const { data, error } = await supabase
-      .from('produtos')
-      .select('*, marcas(id, nome, logo_url)')
-      .eq('id', id)
-      .single()
-
-    if (error || !data) {
-      const produto = produtosMock.find(p => p.id === id)
-      return { data: produto || null, error: produto ? null : new Error('Produto não encontrado') }
-    }
-
-    return { data, error }
-  } catch (err) {
-    const produto = produtosMock.find(p => p.id === id)
-    return { data: produto || null, error: produto ? null : new Error('Produto não encontrado') }
-  }
+  if (error) throw error
+  return data
 }
 
 export async function createProduto(produto) {
@@ -116,7 +73,11 @@ export async function createProduto(produto) {
     .select()
     .single()
 
-  return { data, error }
+  if (error) {
+    console.error('Erro ao criar produto:', error)
+    throw error
+  }
+  return data
 }
 
 export async function updateProduto(id, updates) {
@@ -127,7 +88,11 @@ export async function updateProduto(id, updates) {
     .select()
     .single()
 
-  return { data, error }
+  if (error) {
+    console.error('Erro ao atualizar produto:', error)
+    throw error
+  }
+  return data
 }
 
 export async function deleteProduto(id) {
@@ -136,24 +101,34 @@ export async function deleteProduto(id) {
     .delete()
     .eq('id', id)
 
-  return { error }
+  if (error) {
+    console.error('Erro ao deletar produto:', error)
+    throw error
+  }
 }
 
-export async function toggleProdutoAtivo(id, ativo) {
+export async function toggleProdutoAtivo(id, currentAtivo) {
+  const newAtivo = !currentAtivo
+  
   const { data, error } = await supabase
     .from('produtos')
-    .update({ ativo: !ativo })
+    .update({ ativo: newAtivo })
     .eq('id', id)
     .select()
     .single()
 
-  return { data, error }
+  if (error) {
+    console.error('Erro ao toggle produto:', error)
+    throw error
+  }
+  
+  return data
 }
 
-// Função para buscar marcas
 export function useMarcas() {
   const [marcas, setMarcas] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     fetchMarcas()
@@ -161,29 +136,29 @@ export function useMarcas() {
 
   async function fetchMarcas() {
     setLoading(true)
+    setError(null)
 
-    // Se Supabase não está configurado, usar dados mock
-    if (!isSupabaseConfigured) {
-      setMarcas(marcasMock)
-      setLoading(false)
-      return
-    }
-
-    // Tentar buscar do Supabase, fallback para mock
     try {
-      const { data, error } = await supabase.from('marcas').select('*').order('nome')
+      const { data, error: fetchError } = await supabase
+        .from('marcas')
+        .select('*')
+        .order('nome')
 
-      if (error || !data || data.length === 0) {
-        setMarcas(marcasMock)
+      if (fetchError) {
+        console.error('Erro ao buscar marcas:', fetchError)
+        setError(fetchError.message)
+        setMarcas([])
       } else {
-        setMarcas(data)
+        setMarcas(data || [])
       }
     } catch (err) {
-      setMarcas(marcasMock)
+      console.error('Erro ao buscar marcas:', err)
+      setError(err.message)
+      setMarcas([])
     }
 
     setLoading(false)
   }
 
-  return { marcas, loading, refetch: fetchMarcas }
+  return { marcas, loading, error, refetch: fetchMarcas }
 }

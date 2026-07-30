@@ -23,7 +23,7 @@ export default function Modal({ isOpen, onClose, children }) {
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-noir-800/80 flex items-center justify-center text-ivory/40 hover:text-ivory hover:bg-noir-800 transition-all duration-200 z-20"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-noir-800 flex items-center justify-center text-ivory/40 hover:text-ivory hover:bg-noir-800 transition-all duration-200 z-20"
           style={{ border: '0.25px solid rgba(212, 175, 55, 0.1)' }}
         >
           <X size={14} strokeWidth={1.5} />

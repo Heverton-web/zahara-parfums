@@ -42,7 +42,7 @@ export default function Sidebar() {
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 ${
                   isActive
                     ? 'bg-gold/10 text-gold border border-gold/20'
-                    : 'text-ivory/50 hover:text-ivory hover:bg-noir-800/50'
+                    : 'text-ivory/50 hover:text-ivory hover:bg-noir-800'
                 }`}
               >
                 <Icon size={18} className={isActive ? 'text-gold' : ''} />

@@ -47,7 +47,7 @@ export default function Loja() {
         <div className="sm:hidden mb-4">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="w-full flex items-center justify-between p-4 rounded-xl bg-noir-900/50 text-ivory/70"
+            className="w-full flex items-center justify-between p-4 rounded-xl bg-noir-900 text-ivory/70"
             style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
           >
             <div className="flex items-center gap-2">

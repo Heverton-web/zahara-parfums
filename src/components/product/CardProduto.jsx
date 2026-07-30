@@ -29,14 +29,14 @@ export default function CardProduto({ produto }) {
   return (
     <>
       <div 
-        className="group relative bg-noir-900/80 rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-lg hover:shadow-gold/5"
+        className="group relative bg-noir-900 rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-lg hover:shadow-gold/5"
         style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
         onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.35)'}
         onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.15)'}
       >
         {/* Image container */}
         <Link to={`/produto/${produto.id}`} className="block">
-          <div className="aspect-square bg-noir-800/50 relative overflow-hidden">
+          <div className="aspect-square bg-noir-800 relative overflow-hidden">
             {produto.imagem_url && !imageError ? (
               <img
                 src={produto.imagem_url}

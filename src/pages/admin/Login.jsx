@@ -55,8 +55,11 @@ export default function Login() {
           
           <form
             onSubmit={handleSubmit}
-            className="bg-noir-900/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-8"
-            style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
+            className="backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-8"
+            style={{ 
+              backgroundColor: '#0a0a0f',
+              border: '0.25px solid rgba(212, 175, 55, 0.15)' 
+            }}
           >
             <div className="space-y-4 sm:space-y-5">
               <Input

@@ -1,57 +1,51 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../../lib/supabase'
-import Input from '../ui/Input'
-import Select from '../ui/Select'
-import Button from '../ui/Button'
-import { Upload, X } from 'lucide-react'
+import { X, Upload, Check } from 'lucide-react'
+import { createProduto, updateProduto } from '../../hooks/useProdutos'
 
-const tagOptions = [
+const generos = [
+  { value: 'masculino', label: 'Masculino' },
+  { value: 'feminino', label: 'Feminino' },
+  { value: 'unissex', label: 'Unissex' },
+]
+
+const tagsDisponiveis = [
   { value: 'lançamento', label: 'Lançamento' },
   { value: 'promoção', label: 'Promoção' },
   { value: 'oferta relâmpago', label: 'Oferta Relâmpago' },
 ]
 
-export default function FormProduto({ produto, onSuccess, onCancel }) {
-  const [marcas, setMarcas] = useState([])
+export default function FormProduto({ produto, marcas = [], onSuccess, onCancel }) {
   const [form, setForm] = useState({
     nome: '',
     marca_id: '',
-    genero: 'feminino',
+    genero: 'masculino',
     preco: '',
     descricao: '',
     tags: [],
-    imagem: null,
+    imagem_url: '',
   })
-  const [loading, setLoading] = useState(false)
   const [preview, setPreview] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    fetchMarcas()
     if (produto) {
       setForm({
         nome: produto.nome || '',
         marca_id: produto.marca_id || '',
-        genero: produto.genero || 'feminino',
-        preco: produto.preco || '',
+        genero: produto.genero || 'masculino',
+        preco: produto.preco?.toString() || '',
         descricao: produto.descricao || '',
         tags: produto.tags || [],
-        imagem: null,
+        imagem_url: produto.imagem_url || '',
       })
-      setPreview(produto.imagem_url || null)
+      if (produto.imagem_url) setPreview(produto.imagem_url)
     }
   }, [produto])
 
-  async function fetchMarcas() {
-    const { data } = await supabase.from('marcas').select('*').order('nome')
-    if (data) setMarcas(data)
-  }
-
-  function handleImageChange(e) {
-    const file = e.target.files[0]
-    if (file) {
-      setForm(prev => ({ ...prev, imagem: file }))
-      setPreview(URL.createObjectURL(file))
-    }
+  function handleChange(e) {
+    const { name, value } = e.target
+    setForm(prev => ({ ...prev, [name]: value }))
   }
 
   function handleTagToggle(tag) {
@@ -63,191 +57,263 @@ export default function FormProduto({ produto, onSuccess, onCancel }) {
     }))
   }
 
+  function handleImageUrl(e) {
+    const url = e.target.value
+    setForm(prev => ({ ...prev, imagem_url: url }))
+    if (url) setPreview(url)
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
+    setError('')
     setLoading(true)
 
-    let imagem_url = produto?.imagem_url || null
-
-    if (form.imagem) {
-      const fileExt = form.imagem.name.split('.').pop()
-      const fileName = `${Date.now()}.${fileExt}`
-      const { data: uploadData } = await supabase.storage
-        .from('produtos')
-        .upload(fileName, form.imagem)
-
-      if (uploadData) {
-        const { data: urlData } = supabase.storage
-          .from('produtos')
-          .getPublicUrl(uploadData.path)
-        imagem_url = urlData.publicUrl
+    try {
+      const produtoData = {
+        nome: form.nome,
+        marca_id: form.marca_id || null,
+        genero: form.genero,
+        preco: parseFloat(form.preco) || 0,
+        descricao: form.descricao,
+        tags: form.tags,
+        imagem_url: form.imagem_url || null,
+        ativo: produto?.ativo ?? true,
       }
-    }
 
-    const payload = {
-      nome: form.nome,
-      marca_id: form.marca_id || null,
-      genero: form.genero,
-      preco: parseFloat(form.preco),
-      descricao: form.descricao,
-      tags: form.tags,
-      imagem_url,
-    }
+      console.log('Salvando produto:', produtoData)
 
-    if (produto) {
-      await supabase.from('produtos').update(payload).eq('id', produto.id)
-    } else {
-      await supabase.from('produtos').insert(payload)
+      if (produto) {
+        const result = await updateProduto(produto.id, produtoData)
+        console.log('Produto atualizado:', result)
+      } else {
+        const result = await createProduto(produtoData)
+        console.log('Produto criado:', result)
+      }
+      onSuccess()
+    } catch (err) {
+      console.error('Erro ao salvar:', err)
+      setError(err.message || 'Erro ao salvar produto')
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
-    onSuccess()
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <Input
-        label="Nome do Produto"
-        value={form.nome}
-        onChange={(e) => setForm(prev => ({ ...prev, nome: e.target.value }))}
-        placeholder="Ex: Oud Royale, Amber Noir..."
-        required
-      />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="p-3 rounded-lg text-sm" style={{ backgroundColor: 'rgba(153, 27, 27, 0.2)', color: '#fca5a5' }}>
+          {error}
+        </div>
+      )}
 
-      <Select
-        label="Marca"
-        value={form.marca_id}
-        onChange={(e) => setForm(prev => ({ ...prev, marca_id: e.target.value }))}
-        options={[
-          { value: '', label: 'Selecione...' },
-          ...marcas.map(m => ({ value: m.id, label: m.nome }))
-        ]}
-      />
-
-      <Select
-        label="Gênero"
-        value={form.genero}
-        onChange={(e) => setForm(prev => ({ ...prev, genero: e.target.value }))}
-        options={[
-          { value: 'feminino', label: 'Feminino' },
-          { value: 'masculino', label: 'Masculino' },
-          { value: 'unissex', label: 'Unissex' },
-        ]}
-      />
-
-      <Input
-        label="Preço (R$)"
-        type="number"
-        step="0.01"
-        min="0"
-        value={form.preco}
-        onChange={(e) => setForm(prev => ({ ...prev, preco: e.target.value }))}
-        placeholder="0.00"
-        required
-      />
-
+      {/* Nome */}
       <div>
-        <label className="font-accent text-[10px] uppercase tracking-wider text-ivory/50 block mb-2">
-          Descrição
+        <label className="block text-[10px] text-ivory/40 uppercase tracking-wider mb-1.5 font-medium">
+          Nome do Produto
         </label>
-        <textarea
-          className="input-luxury w-full h-24 resize-none"
-          value={form.descricao}
-          onChange={(e) => setForm(prev => ({ ...prev, descricao: e.target.value }))}
-          placeholder="Descreva o perfume, notas, características..."
+        <input
+          type="text"
+          name="nome"
+          value={form.nome}
+          onChange={handleChange}
+          placeholder="Ex: Oud Mood"
+          required
+          className="w-full px-3 py-2.5 rounded-lg text-sm text-ivory placeholder-ivory/25 focus:outline-none transition-all"
+          style={{ 
+            backgroundColor: '#12121a',
+            border: '0.25px solid rgba(212, 175, 55, 0.08)'
+          }}
+          onFocus={(e) => e.target.style.borderColor = 'rgba(212, 175, 55, 0.3)'}
+          onBlur={(e) => e.target.style.borderColor = 'rgba(212, 175, 55, 0.08)'}
         />
       </div>
 
+      {/* Marca */}
       <div>
-        <label className="font-accent text-[10px] uppercase tracking-wider text-ivory/50 block mb-3">
+        <label className="block text-[10px] text-ivory/40 uppercase tracking-wider mb-1.5 font-medium">
+          Marca
+        </label>
+        <select
+          name="marca_id"
+          value={form.marca_id}
+          onChange={handleChange}
+          className="w-full px-3 py-2.5 rounded-lg text-sm text-ivory focus:outline-none transition-all cursor-pointer"
+          style={{ 
+            backgroundColor: '#12121a',
+            border: '0.25px solid rgba(212, 175, 55, 0.08)'
+          }}
+          onFocus={(e) => e.target.style.borderColor = 'rgba(212, 175, 55, 0.3)'}
+          onBlur={(e) => e.target.style.borderColor = 'rgba(212, 175, 55, 0.08)'}
+        >
+          <option value="">Selecione uma marca</option>
+          {marcas.map(marca => (
+            <option key={marca.id} value={marca.id}>{marca.nome}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Gênero e Preço */}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-[10px] text-ivory/40 uppercase tracking-wider mb-1.5 font-medium">
+            Gênero
+          </label>
+          <select
+            name="genero"
+            value={form.genero}
+            onChange={handleChange}
+            className="w-full px-3 py-2.5 rounded-lg text-sm text-ivory focus:outline-none transition-all cursor-pointer"
+            style={{ 
+              backgroundColor: '#12121a',
+              border: '0.25px solid rgba(212, 175, 55, 0.08)'
+            }}
+            onFocus={(e) => e.target.style.borderColor = 'rgba(212, 175, 55, 0.3)'}
+            onBlur={(e) => e.target.style.borderColor = 'rgba(212, 175, 55, 0.08)'}
+          >
+            {generos.map(g => (
+              <option key={g.value} value={g.value}>{g.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-[10px] text-ivory/40 uppercase tracking-wider mb-1.5 font-medium">
+            Preço (R$)
+          </label>
+          <input
+            type="number"
+            name="preco"
+            value={form.preco}
+            onChange={handleChange}
+            placeholder="0,00"
+            step="0.01"
+            min="0"
+            required
+            className="w-full px-3 py-2.5 rounded-lg text-sm text-ivory placeholder-ivory/25 focus:outline-none transition-all"
+            style={{ 
+              backgroundColor: '#12121a',
+              border: '0.25px solid rgba(212, 175, 55, 0.08)'
+            }}
+            onFocus={(e) => e.target.style.borderColor = 'rgba(212, 175, 55, 0.3)'}
+            onBlur={(e) => e.target.style.borderColor = 'rgba(212, 175, 55, 0.08)'}
+          />
+        </div>
+      </div>
+
+      {/* Descrição */}
+      <div>
+        <label className="block text-[10px] text-ivory/40 uppercase tracking-wider mb-1.5 font-medium">
+          Descrição
+        </label>
+        <textarea
+          name="descricao"
+          value={form.descricao}
+          onChange={handleChange}
+          placeholder="Descrição do produto..."
+          rows={3}
+          className="w-full px-3 py-2.5 rounded-lg text-sm text-ivory placeholder-ivory/25 focus:outline-none transition-all resize-none"
+          style={{ 
+            backgroundColor: '#12121a',
+            border: '0.25px solid rgba(212, 175, 55, 0.08)'
+          }}
+          onFocus={(e) => e.target.style.borderColor = 'rgba(212, 175, 55, 0.3)'}
+          onBlur={(e) => e.target.style.borderColor = 'rgba(212, 175, 55, 0.08)'}
+        />
+      </div>
+
+      {/* Tags */}
+      <div>
+        <label className="block text-[10px] text-ivory/40 uppercase tracking-wider mb-2 font-medium">
           Tags
         </label>
         <div className="flex flex-wrap gap-2">
-          {tagOptions.map(tag => (
+          {tagsDisponiveis.map(tag => (
             <button
               key={tag.value}
               type="button"
               onClick={() => handleTagToggle(tag.value)}
-              className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ${
-                form.tags.includes(tag.value)
-                  ? 'bg-gold/15 text-gold'
-                  : 'bg-noir-800/50 text-ivory/40 hover:text-ivory/60'
-              }`}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 flex items-center gap-1.5"
               style={{ 
+                backgroundColor: form.tags.includes(tag.value) ? 'rgba(212, 175, 55, 0.15)' : '#12121a',
                 border: form.tags.includes(tag.value) 
                   ? '0.25px solid rgba(212, 175, 55, 0.4)' 
-                  : '0.25px solid rgba(212, 175, 55, 0.15)' 
+                  : '0.25px solid rgba(212, 175, 55, 0.08)',
+                color: form.tags.includes(tag.value) ? '#c9a84c' : 'rgba(253, 249, 240, 0.5)'
               }}
             >
+              {form.tags.includes(tag.value) && <Check size={12} />}
               {tag.label}
             </button>
           ))}
         </div>
       </div>
 
+      {/* Imagem URL */}
       <div>
-        <label className="font-accent text-[10px] uppercase tracking-wider text-ivory/50 block mb-2">
-          Imagem
+        <label className="block text-[10px] text-ivory/40 uppercase tracking-wider mb-1.5 font-medium">
+          URL da Imagem
         </label>
-        <div className="relative">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="hidden"
-            id="file-upload"
-          />
-          <label
-            htmlFor="file-upload"
-            className="flex flex-col items-center justify-center w-full h-32 border border-dashed rounded-xl cursor-pointer transition-colors duration-300"
-            style={{ borderColor: 'rgba(212, 175, 55, 0.15)' }}
-            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.3)'}
-            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.15)'}
-          >
-            <Upload className="text-ivory/30 mb-2" size={24} />
-            <span className="text-ivory/40 text-sm">
-              {preview ? 'Trocar imagem' : 'Clique para enviar'}
-            </span>
-          </label>
-        </div>
-        
+        <input
+          type="url"
+          name="imagem_url"
+          value={form.imagem_url}
+          onChange={handleImageUrl}
+          placeholder="https://exemplo.com/imagem.jpg"
+          className="w-full px-3 py-2.5 rounded-lg text-sm text-ivory placeholder-ivory/25 focus:outline-none transition-all"
+          style={{ 
+            backgroundColor: '#12121a',
+            border: '0.25px solid rgba(212, 175, 55, 0.08)'
+          }}
+          onFocus={(e) => e.target.style.borderColor = 'rgba(212, 175, 55, 0.3)'}
+          onBlur={(e) => e.target.style.borderColor = 'rgba(212, 175, 55, 0.08)'}
+        />
         {preview && (
-          <div className="relative mt-4 inline-block">
+          <div className="mt-2 relative inline-block">
             <img
               src={preview}
               alt="Preview"
-              className="h-32 w-32 object-cover rounded-xl"
+              className="h-20 w-20 object-cover rounded-lg"
               style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
+              onError={() => setPreview(null)}
             />
             <button
               type="button"
-              onClick={() => {
-                setPreview(null)
-                setForm(prev => ({ ...prev, imagem: null }))
-              }}
-              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-noir-900 flex items-center justify-center text-ivory/50 hover:text-wine transition-colors"
+              onClick={() => { setPreview(null); setForm(prev => ({ ...prev, imagem_url: '' })) }}
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-noir-800 flex items-center justify-center text-ivory/50 hover:text-wine transition-colors"
               style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
             >
-              <X size={12} />
+              <X size={10} />
             </button>
           </div>
         )}
       </div>
 
-      <div className="flex gap-3 pt-4">
-        <Button type="submit" disabled={loading} className="flex-1">
+      {/* Botões */}
+      <div className="flex gap-3 pt-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 px-4 py-2.5 rounded-xl text-ivory/50 hover:text-ivory/70 text-sm font-medium transition-all duration-200"
+          style={{ 
+            backgroundColor: '#12121a',
+            border: '0.25px solid rgba(212, 175, 55, 0.08)' 
+          }}
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          disabled={loading || !form.nome}
+          className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-gold to-gold-light text-noir-950 text-sm font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:from-gold-light hover:to-gold"
+        >
           {loading ? (
             <span className="flex items-center justify-center gap-2">
               <div className="w-4 h-4 border-2 border-noir-950/30 border-t-noir-950 rounded-full animate-spin" />
               Salvando...
             </span>
           ) : (
-            produto ? 'Salvar Alterações' : 'Criar Produto'
+            produto ? 'Atualizar' : 'Criar Produto'
           )}
-        </Button>
-        <Button type="button" variant="ghost" onClick={onCancel}>
-          Cancelar
-        </Button>
+        </button>
       </div>
     </form>
   )

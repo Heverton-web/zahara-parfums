@@ -1,6 +1,6 @@
 export default function Badge({ children, variant = 'default', className = '' }) {
   const variants = {
-    default: 'bg-noir-800/80 text-ivory/70',
+    default: 'bg-noir-800 text-ivory/70',
     gold: 'bg-gold/15 text-gold',
     success: 'bg-emerald-500/15 text-emerald-400',
     danger: 'bg-red-500/15 text-red-400',

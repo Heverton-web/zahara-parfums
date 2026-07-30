@@ -22,7 +22,7 @@ export default function Header() {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
           ? 'glass py-3 shadow-lg'
-          : 'bg-noir-950/90 backdrop-blur-sm py-4'
+          : 'bg-noir-950 backdrop-blur-sm py-4'
       }`}
     >
       <div className="px-4 sm:px-6">
@@ -88,21 +88,21 @@ export default function Header() {
             <div className="flex flex-col gap-1">
               <Link
                 to="/"
-                className="py-3 px-4 text-ivory/70 hover:text-gold hover:bg-noir-800/50 rounded-lg transition-all text-sm font-medium"
+                className="py-3 px-4 text-ivory/70 hover:text-gold hover:bg-noir-800 rounded-lg transition-all text-sm font-medium"
                 onClick={closeMenu}
               >
                 Home
               </Link>
               <Link
                 to="/loja"
-                className="py-3 px-4 text-ivory/70 hover:text-gold hover:bg-noir-800/50 rounded-lg transition-all text-sm font-medium"
+                className="py-3 px-4 text-ivory/70 hover:text-gold hover:bg-noir-800 rounded-lg transition-all text-sm font-medium"
                 onClick={closeMenu}
               >
                 Coleção
               </Link>
               <Link
                 to="/marcas"
-                className="py-3 px-4 text-ivory/70 hover:text-gold hover:bg-noir-800/50 rounded-lg transition-all text-sm font-medium"
+                className="py-3 px-4 text-ivory/70 hover:text-gold hover:bg-noir-800 rounded-lg transition-all text-sm font-medium"
                 onClick={closeMenu}
               >
                 Marcas

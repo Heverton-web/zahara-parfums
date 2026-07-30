@@ -21,7 +21,7 @@ export default function Filtros({ filtros, onFiltroChange, marcas }) {
   ]
 
   return (
-    <div className="p-3 sm:p-5 rounded-xl bg-noir-900/30 sm:bg-noir-900/50" style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}>
+    <div className="p-3 sm:p-5 rounded-xl bg-noir-900 sm:bg-noir-900" style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}>
       {/* Desktop layout */}
       <div className="hidden sm:flex flex-wrap items-center justify-center gap-5">
         <div className="flex items-center gap-2 mr-2">

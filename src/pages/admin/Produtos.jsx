@@ -4,6 +4,7 @@ import { useProdutos, toggleProdutoAtivo, deleteProduto } from '../../hooks/useP
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import Modal from '../../components/ui/Modal'
+import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import FormProduto from '../../components/product/FormProduto'
 import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Search, MoreVertical } from 'lucide-react'
 
@@ -15,6 +16,9 @@ export default function AdminProdutos() {
   const [produtoEditando, setProdutoEditando] = useState(null)
   const [busca, setBusca] = useState('')
   const [expandedCard, setExpandedCard] = useState(null)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [produtoToDelete, setProdutoToDelete] = useState(null)
+  const [togglingId, setTogglingId] = useState(null)
 
   useEffect(() => {
     fetchMarcas()
@@ -36,17 +40,33 @@ export default function AdminProdutos() {
     setModalOpen(true)
   }
 
-  async function handleDelete(id) {
-    if (confirm('Tem certeza que deseja excluir este produto?')) {
-      await deleteProduto(id)
-      refetch()
-    }
+  function handleDeleteClick(id) {
+    setProdutoToDelete(id)
+    setConfirmOpen(true)
     setExpandedCard(null)
   }
 
+  async function handleDeleteConfirm() {
+    if (produtoToDelete) {
+      try {
+        await deleteProduto(produtoToDelete)
+        await refetch()
+      } catch (err) {
+        console.error('Erro ao deletar:', err)
+      }
+    }
+    setProdutoToDelete(null)
+  }
+
   async function handleToggle(produto) {
-    await toggleProdutoAtivo(produto.id, produto.ativo)
-    refetch()
+    setTogglingId(produto.id)
+    try {
+      await toggleProdutoAtivo(produto.id, produto.ativo)
+      await refetch()
+    } catch (err) {
+      console.error('Erro ao toggle:', err)
+    }
+    setTogglingId(null)
     setExpandedCard(null)
   }
 
@@ -103,7 +123,7 @@ export default function AdminProdutos() {
 
       {/* Desktop Table */}
       <div 
-        className="hidden lg:block bg-noir-900/50 rounded-xl overflow-hidden"
+        className="hidden lg:block bg-noir-900 rounded-xl overflow-hidden"
         style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
       >
         <div className="overflow-x-auto">
@@ -150,7 +170,7 @@ export default function AdminProdutos() {
                 produtosFiltrados.map((produto) => (
                   <tr
                     key={produto.id}
-                    className="hover:bg-noir-800/20 transition-colors duration-200"
+                    className="hover:bg-noir-800 transition-colors duration-200"
                     style={{ borderBottom: '0.25px solid rgba(212, 175, 55, 0.1)' }}
                   >
                     <td className="px-5 py-3">
@@ -194,11 +214,16 @@ export default function AdminProdutos() {
                       <div className="flex justify-end gap-1.5">
                         <button
                           onClick={() => handleToggle(produto)}
-                          className="w-7 h-7 rounded-lg flex items-center justify-center text-ivory/30 hover:text-gold transition-all duration-300"
+                          disabled={togglingId === produto.id}
+                          className="w-7 h-7 rounded-lg flex items-center justify-center text-ivory/30 hover:text-gold transition-all duration-300 disabled:opacity-50"
                           style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
                           title={produto.ativo ? 'Inativar' : 'Ativar'}
                         >
-                          {produto.ativo ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                          {togglingId === produto.id ? (
+                            <div className="w-3 h-3 border border-gold/30 border-t-gold rounded-full animate-spin" />
+                          ) : (
+                            produto.ativo ? <ToggleRight size={14} /> : <ToggleLeft size={14} />
+                          )}
                         </button>
                         <button
                           onClick={() => handleEdit(produto)}
@@ -208,7 +233,7 @@ export default function AdminProdutos() {
                           <Pencil size={14} />
                         </button>
                         <button
-                          onClick={() => handleDelete(produto.id)}
+                          onClick={() => handleDeleteClick(produto.id)}
                           className="w-7 h-7 rounded-lg flex items-center justify-center text-ivory/30 hover:text-wine transition-all duration-300"
                           style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
                         >
@@ -238,7 +263,7 @@ export default function AdminProdutos() {
           produtosFiltrados.map((produto) => (
             <div
               key={produto.id}
-              className="bg-noir-900/50 rounded-xl p-4"
+              className="bg-noir-900 rounded-xl p-4"
               style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
             >
               <div className="flex items-start gap-3">
@@ -302,21 +327,26 @@ export default function AdminProdutos() {
                     >
                       <button
                         onClick={() => handleToggle(produto)}
-                        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-ivory/60 hover:text-gold hover:bg-noir-800/50 transition-all"
+                        disabled={togglingId === produto.id}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-ivory/60 hover:text-gold hover:bg-noir-800 transition-all disabled:opacity-50"
                       >
-                        {produto.ativo ? <ToggleLeft size={14} /> : <ToggleRight size={14} />}
+                        {togglingId === produto.id ? (
+                          <div className="w-3 h-3 border border-gold/30 border-t-gold rounded-full animate-spin" />
+                        ) : (
+                          produto.ativo ? <ToggleLeft size={14} /> : <ToggleRight size={14} />
+                        )}
                         {produto.ativo ? 'Inativar' : 'Ativar'}
                       </button>
                       <button
                         onClick={() => handleEdit(produto)}
-                        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-ivory/60 hover:text-gold hover:bg-noir-800/50 transition-all"
+                        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-ivory/60 hover:text-gold hover:bg-noir-800 transition-all"
                       >
                         <Pencil size={14} />
                         Editar
                       </button>
                       <button
-                        onClick={() => handleDelete(produto.id)}
-                        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-ivory/60 hover:text-wine hover:bg-noir-800/50 transition-all"
+                        onClick={() => handleDeleteClick(produto.id)}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-ivory/60 hover:text-wine hover:bg-noir-800 transition-all"
                       >
                         <Trash2 size={14} />
                         Excluir
@@ -330,17 +360,29 @@ export default function AdminProdutos() {
         )}
       </div>
 
-      <Modal
-        isOpen={modalOpen}
-        onClose={() => { setModalOpen(false); setProdutoEditando(null) }}
-        title={produtoEditando ? 'Editar Produto' : 'Novo Produto'}
-      >
+      <Modal isOpen={modalOpen} onClose={() => { setModalOpen(false); setProdutoEditando(null) }}>
+        <div className="mb-4">
+          <h3 className="font-heading text-lg font-semibold text-ivory">
+            {produtoEditando ? 'Editar Produto' : 'Novo Produto'}
+          </h3>
+        </div>
         <FormProduto
           produto={produtoEditando}
+          marcas={marcas}
           onSuccess={handleSuccess}
           onCancel={() => { setModalOpen(false); setProdutoEditando(null) }}
         />
       </Modal>
+
+      <ConfirmDialog
+        isOpen={confirmOpen}
+        onClose={() => { setConfirmOpen(false); setProdutoToDelete(null) }}
+        onConfirm={handleDeleteConfirm}
+        title="Excluir Produto"
+        message="Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        variant="danger"
+      />
     </div>
   )
 }
