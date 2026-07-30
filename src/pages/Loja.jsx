@@ -1,44 +1,19 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
 import { useProdutos } from '../hooks/useProdutos'
-import { useTracking } from '../hooks/useTracking'
-import { getWhatsAppConfig, buildWhatsAppLink } from '../lib/whatsapp'
+import { Gem, SlidersHorizontal, X } from 'lucide-react'
 import Filtros from '../components/product/Filtros'
 import ListaProdutos from '../components/product/ListaProdutos'
-import { Gem, SlidersHorizontal, X } from 'lucide-react'
+import { marcasMock } from '../data/mock'
 
 export default function Loja() {
   const [filtros, setFiltros] = useState({ genero: '', marca: '', tag: '' })
   const [marcas, setMarcas] = useState([])
   const [showFilters, setShowFilters] = useState(false)
   const { produtos, loading } = useProdutos({ ...filtros, ativo: true })
-  const { trackClick } = useTracking()
 
   useEffect(() => {
-    fetchMarcas()
+    setMarcas(marcasMock)
   }, [])
-
-  async function fetchMarcas() {
-    // Se Supabase não está configurado, usar mock
-    const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && 
-      import.meta.env.VITE_SUPABASE_URL !== 'sua_url_aqui'
-    
-    if (!isSupabaseConfigured) {
-      const { marcasMock } = await import('../data/mock')
-      setMarcas(marcasMock)
-      return
-    }
-
-    const { data } = await supabase.from('marcas').select('*').order('nome')
-    if (data) setMarcas(data)
-  }
-
-  async function handleWhatsAppClick(produto) {
-    await trackClick(produto.id)
-    const numero = await getWhatsAppConfig()
-    const link = buildWhatsAppLink(numero, produto)
-    window.open(link, '_blank')
-  }
 
   function handleFiltroChange(campo, valor) {
     setFiltros((prev) => ({ ...prev, [campo]: valor }))
@@ -48,7 +23,7 @@ export default function Loja() {
 
   return (
     <div className="min-h-screen bg-noir-950 pt-16 sm:pt-20 pb-12 sm:pb-16">
-      {/* Hero section - more compact on mobile */}
+      {/* Hero section */}
       <div className="relative py-10 sm:py-16 mb-6 sm:mb-12">
         <div className="absolute inset-0 bg-pattern-arabic opacity-20" />
         <div className="absolute inset-0 bg-gradient-to-b from-noir-950/80 to-noir-950" />
@@ -72,7 +47,8 @@ export default function Loja() {
         <div className="sm:hidden mb-4">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="w-full flex items-center justify-between p-4 rounded-xl bg-noir-900/50 border border-noir-800/50 text-ivory/70"
+            className="w-full flex items-center justify-between p-4 rounded-xl bg-noir-900/50 text-ivory/70"
+            style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
           >
             <div className="flex items-center gap-2">
               <SlidersHorizontal size={16} className="text-gold/60" />
@@ -110,7 +86,7 @@ export default function Loja() {
             <p className="font-display text-ivory/40 sm:text-ivory/50 italic text-sm sm:text-base">Carregando coleção...</p>
           </div>
         ) : produtos.length > 0 ? (
-          <ListaProdutos produtos={produtos} onWhatsAppClick={handleWhatsAppClick} />
+          <ListaProdutos produtos={produtos} />
         ) : (
           <div className="text-center py-16 sm:py-20">
             <Gem className="text-gold/20 mx-auto mb-4" size={48} />

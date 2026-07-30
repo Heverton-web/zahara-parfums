@@ -168,11 +168,16 @@ export default function FormProduto({ produto, onSuccess, onCancel }) {
               key={tag.value}
               type="button"
               onClick={() => handleTagToggle(tag.value)}
-              className={`px-4 py-2 rounded-full text-sm border transition-all duration-300 ${
+              className={`px-4 py-2 rounded-full text-sm transition-all duration-300 ${
                 form.tags.includes(tag.value)
-                  ? 'bg-gold/15 border-gold/40 text-gold'
-                  : 'bg-noir-800/50 border-noir-700 text-ivory/40 hover:border-gold/20 hover:text-ivory/60'
+                  ? 'bg-gold/15 text-gold'
+                  : 'bg-noir-800/50 text-ivory/40 hover:text-ivory/60'
               }`}
+              style={{ 
+                border: form.tags.includes(tag.value) 
+                  ? '0.25px solid rgba(212, 175, 55, 0.4)' 
+                  : '0.25px solid rgba(212, 175, 55, 0.15)' 
+              }}
             >
               {tag.label}
             </button>
@@ -194,7 +199,10 @@ export default function FormProduto({ produto, onSuccess, onCancel }) {
           />
           <label
             htmlFor="file-upload"
-            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-noir-700 rounded-xl cursor-pointer hover:border-gold/30 transition-colors duration-300"
+            className="flex flex-col items-center justify-center w-full h-32 border border-dashed rounded-xl cursor-pointer transition-colors duration-300"
+            style={{ borderColor: 'rgba(212, 175, 55, 0.15)' }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.3)'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(212, 175, 55, 0.15)'}
           >
             <Upload className="text-ivory/30 mb-2" size={24} />
             <span className="text-ivory/40 text-sm">
@@ -208,7 +216,8 @@ export default function FormProduto({ produto, onSuccess, onCancel }) {
             <img
               src={preview}
               alt="Preview"
-              className="h-32 w-32 object-cover rounded-xl border border-noir-700"
+              className="h-32 w-32 object-cover rounded-xl"
+              style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
             />
             <button
               type="button"
@@ -216,7 +225,8 @@ export default function FormProduto({ produto, onSuccess, onCancel }) {
                 setPreview(null)
                 setForm(prev => ({ ...prev, imagem: null }))
               }}
-              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-noir-900 border border-noir-700 flex items-center justify-center text-ivory/50 hover:text-wine transition-colors"
+              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-noir-900 flex items-center justify-center text-ivory/50 hover:text-wine transition-colors"
+              style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
             >
               <X size={12} />
             </button>

@@ -1,6 +1,6 @@
 import CardProduto from './CardProduto'
 
-export default function ListaProdutos({ produtos, onWhatsAppClick }) {
+export default function ListaProdutos({ produtos }) {
   if (produtos.length === 0) {
     return null
   }
@@ -13,10 +13,7 @@ export default function ListaProdutos({ produtos, onWhatsAppClick }) {
           className="animate-fade-in"
           style={{ animationDelay: `${index * 0.05}s` }}
         >
-          <CardProduto
-            produto={produto}
-            onWhatsAppClick={onWhatsAppClick}
-          />
+          <CardProduto produto={produto} />
         </div>
       ))}
     </div>

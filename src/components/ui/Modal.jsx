@@ -1,40 +1,38 @@
 import { X } from 'lucide-react'
 
-export default function Modal({ isOpen, onClose, title, children }) {
+export default function Modal({ isOpen, onClose, children }) {
   if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-noir-950/90 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
         onClick={onClose}
       />
       
       {/* Modal content */}
-      <div className="relative w-full max-w-md bg-noir-900 border border-noir-800 rounded-2xl p-6 shadow-luxury">
-        {/* Decorative corners */}
-        <div className="absolute -top-2 -left-2 w-8 h-8 border-t-2 border-l-2 border-gold/30 rounded-tl-lg" />
-        <div className="absolute -bottom-2 -right-2 w-8 h-8 border-b-2 border-r-2 border-gold/30 rounded-br-lg" />
-        
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="font-heading text-xl font-bold text-ivory">
-            {title}
-          </h2>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full border border-noir-700 flex items-center justify-center text-ivory/50 hover:text-gold hover:border-gold/30 transition-all duration-300"
-          >
-            <X size={16} />
-          </button>
-        </div>
-        
-        {/* Divider */}
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent mb-6" />
+      <div 
+        className="relative w-full max-w-[360px] rounded-3xl shadow-2xl z-10 mx-auto overflow-hidden"
+        style={{ 
+          backgroundColor: '#0a0a0f',
+          border: '1px solid rgba(212, 175, 55, 0.15)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(212, 175, 55, 0.1)'
+        }}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-noir-800/80 flex items-center justify-center text-ivory/40 hover:text-ivory hover:bg-noir-800 transition-all duration-200 z-20"
+          style={{ border: '0.25px solid rgba(212, 175, 55, 0.1)' }}
+        >
+          <X size={14} strokeWidth={1.5} />
+        </button>
         
         {/* Content */}
-        {children}
+        <div className="p-6">
+          {children}
+        </div>
       </div>
     </div>
   )

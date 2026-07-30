@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Gem, Shield, Truck, Gift } from 'lucide-react'
 import { fetchProdutoById } from '../hooks/useProdutos'
-import { useTracking } from '../hooks/useTracking'
-import { getWhatsAppConfig, buildWhatsAppLink } from '../lib/whatsapp'
+import { buildWhatsAppLink } from '../lib/whatsapp'
+import WhatsAppModal from '../components/product/WhatsAppModal'
 import Badge from '../components/ui/Badge'
 
 const tagColors = {
@@ -16,7 +16,7 @@ export default function Produto() {
   const { id } = useParams()
   const [produto, setProduto] = useState(null)
   const [loading, setLoading] = useState(true)
-  const { trackView, trackClick } = useTracking()
+  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
     loadProduto()
@@ -26,15 +26,12 @@ export default function Produto() {
     const { data } = await fetchProdutoById(id)
     if (data) {
       setProduto(data)
-      trackView(data.id)
     }
     setLoading(false)
   }
 
-  async function handleWhatsAppClick() {
-    await trackClick(produto.id)
-    const numero = await getWhatsAppConfig()
-    const link = buildWhatsAppLink(numero, produto)
+  function handleConfirmWhatsApp(nomeUsuario) {
+    const link = buildWhatsAppLink(produto, nomeUsuario)
     window.open(link, '_blank')
   }
 
@@ -143,7 +140,7 @@ export default function Produto() {
 
             {/* CTA */}
             <button
-              onClick={handleWhatsAppClick}
+              onClick={() => setShowModal(true)}
               className="w-full btn-whatsapp text-base sm:text-lg py-3.5 sm:py-4"
             >
               <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor">
@@ -154,15 +151,24 @@ export default function Produto() {
 
             {/* Trust badges */}
             <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-6 sm:mt-8">
-              <div className="text-center p-2.5 sm:p-4 rounded-lg bg-noir-900/50 border border-noir-800/50">
+              <div 
+                className="text-center p-2.5 sm:p-4 rounded-lg bg-noir-900/50"
+                style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
+              >
                 <Shield className="text-gold/50 sm:text-gold/60 mx-auto mb-1.5 sm:mb-2" size={20} />
                 <p className="text-ivory/40 text-[10px] sm:text-xs font-medium leading-tight">Produto Original</p>
               </div>
-              <div className="text-center p-2.5 sm:p-4 rounded-lg bg-noir-900/50 border border-noir-800/50">
+              <div 
+                className="text-center p-2.5 sm:p-4 rounded-lg bg-noir-900/50"
+                style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
+              >
                 <Truck className="text-gold/50 sm:text-gold/60 mx-auto mb-1.5 sm:mb-2" size={20} />
                 <p className="text-ivory/40 text-[10px] sm:text-xs font-medium leading-tight">Envio Todo Brasil</p>
               </div>
-              <div className="text-center p-2.5 sm:p-4 rounded-lg bg-noir-900/50 border border-noir-800/50">
+              <div 
+                className="text-center p-2.5 sm:p-4 rounded-lg bg-noir-900/50"
+                style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
+              >
                 <Gift className="text-gold/50 sm:text-gold/60 mx-auto mb-1.5 sm:mb-2" size={20} />
                 <p className="text-ivory/40 text-[10px] sm:text-xs font-medium leading-tight">Embalagem Premium</p>
               </div>
@@ -170,6 +176,13 @@ export default function Produto() {
           </div>
         </div>
       </div>
+
+      <WhatsAppModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        produto={produto}
+        onConfirm={handleConfirmWhatsApp}
+      />
     </div>
   )
 }

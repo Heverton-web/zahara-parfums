@@ -102,11 +102,14 @@ export default function AdminProdutos() {
       </div>
 
       {/* Desktop Table */}
-      <div className="hidden lg:block bg-noir-900/50 border border-noir-800/50 rounded-xl overflow-hidden">
+      <div 
+        className="hidden lg:block bg-noir-900/50 rounded-xl overflow-hidden"
+        style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
+      >
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-noir-800/50">
+              <tr style={{ borderBottom: '0.25px solid rgba(212, 175, 55, 0.15)' }}>
                 <th className="text-left px-5 py-3 font-accent text-[10px] uppercase tracking-wider text-ivory/40">
                   Produto
                 </th>
@@ -147,7 +150,8 @@ export default function AdminProdutos() {
                 produtosFiltrados.map((produto) => (
                   <tr
                     key={produto.id}
-                    className="border-b border-noir-800/30 hover:bg-noir-800/20 transition-colors duration-200"
+                    className="hover:bg-noir-800/20 transition-colors duration-200"
+                    style={{ borderBottom: '0.25px solid rgba(212, 175, 55, 0.1)' }}
                   >
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
@@ -155,10 +159,14 @@ export default function AdminProdutos() {
                           <img
                             src={produto.imagem_url}
                             alt=""
-                            className="h-10 w-10 rounded-lg object-cover border border-noir-700/50"
+                            className="h-10 w-10 rounded-lg object-cover"
+                            style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
                           />
                         ) : (
-                          <div className="h-10 w-10 rounded-lg bg-noir-800 flex items-center justify-center text-ivory/15 text-[10px] border border-noir-700/50">
+                          <div 
+                            className="h-10 w-10 rounded-lg bg-noir-800 flex items-center justify-center text-ivory/15 text-[10px]"
+                            style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
+                          >
                             IMG
                           </div>
                         )}
@@ -186,20 +194,23 @@ export default function AdminProdutos() {
                       <div className="flex justify-end gap-1.5">
                         <button
                           onClick={() => handleToggle(produto)}
-                          className="w-7 h-7 rounded-lg border border-noir-700/50 flex items-center justify-center text-ivory/30 hover:text-gold hover:border-gold/30 transition-all duration-300"
+                          className="w-7 h-7 rounded-lg flex items-center justify-center text-ivory/30 hover:text-gold transition-all duration-300"
+                          style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
                           title={produto.ativo ? 'Inativar' : 'Ativar'}
                         >
                           {produto.ativo ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
                         </button>
                         <button
                           onClick={() => handleEdit(produto)}
-                          className="w-7 h-7 rounded-lg border border-noir-700/50 flex items-center justify-center text-ivory/30 hover:text-gold hover:border-gold/30 transition-all duration-300"
+                          className="w-7 h-7 rounded-lg flex items-center justify-center text-ivory/30 hover:text-gold transition-all duration-300"
+                          style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
                         >
                           <Pencil size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(produto.id)}
-                          className="w-7 h-7 rounded-lg border border-noir-700/50 flex items-center justify-center text-ivory/30 hover:text-wine hover:border-wine/30 transition-all duration-300"
+                          className="w-7 h-7 rounded-lg flex items-center justify-center text-ivory/30 hover:text-wine transition-all duration-300"
+                          style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
                         >
                           <Trash2 size={14} />
                         </button>
@@ -227,7 +238,8 @@ export default function AdminProdutos() {
           produtosFiltrados.map((produto) => (
             <div
               key={produto.id}
-              className="bg-noir-900/50 border border-noir-800/50 rounded-xl p-4"
+              className="bg-noir-900/50 rounded-xl p-4"
+              style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
             >
               <div className="flex items-start gap-3">
                 {/* Image */}
@@ -235,10 +247,14 @@ export default function AdminProdutos() {
                   <img
                     src={produto.imagem_url}
                     alt=""
-                    className="h-16 w-16 rounded-lg object-cover border border-noir-700/50 flex-shrink-0"
+                    className="h-16 w-16 rounded-lg object-cover flex-shrink-0"
+                    style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
                   />
                 ) : (
-                  <div className="h-16 w-16 rounded-lg bg-noir-800 flex items-center justify-center text-ivory/15 text-[10px] border border-noir-700/50 flex-shrink-0">
+                  <div 
+                    className="h-16 w-16 rounded-lg bg-noir-800 flex items-center justify-center text-ivory/15 text-[10px] flex-shrink-0"
+                    style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
+                  >
                     IMG
                   </div>
                 )}
@@ -272,14 +288,18 @@ export default function AdminProdutos() {
                 <div className="relative">
                   <button
                     onClick={() => setExpandedCard(expandedCard === produto.id ? null : produto.id)}
-                    className="w-8 h-8 rounded-lg border border-noir-700/50 flex items-center justify-center text-ivory/30 hover:text-ivory/60 transition-all"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-ivory/30 hover:text-ivory/60 transition-all"
+                    style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
                   >
                     <MoreVertical size={16} />
                   </button>
 
                   {/* Dropdown */}
                   {expandedCard === produto.id && (
-                    <div className="absolute right-0 top-10 w-36 bg-noir-900 border border-noir-800 rounded-xl shadow-lg z-10 overflow-hidden">
+                    <div 
+                      className="absolute right-0 top-10 w-36 bg-noir-900 rounded-xl shadow-lg z-10 overflow-hidden"
+                      style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
+                    >
                       <button
                         onClick={() => handleToggle(produto)}
                         className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-ivory/60 hover:text-gold hover:bg-noir-800/50 transition-all"

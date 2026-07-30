@@ -232,7 +232,7 @@ body {
 /* Luxury input */
 .input-luxury {
   background: rgba(26, 26, 26, 0.8);
-  border: 1px solid rgba(201, 168, 76, 0.2);
+  border: 0.25px solid rgba(212, 175, 55, 0.15);
   color: #fdf9f0;
   padding: 14px 18px;
   border-radius: 8px;
@@ -247,6 +247,16 @@ body {
 
 .input-luxury::placeholder {
   color: rgba(253, 249, 240, 0.4);
+}
+
+/* WhatsApp modal input */
+.input-whatsapp {
+  background-color: #12121a;
+  color: #fdf9f0;
+}
+
+.input-whatsapp::placeholder {
+  color: rgba(253, 249, 240, 0.35);
 }
 
 /* WhatsApp button luxury */
