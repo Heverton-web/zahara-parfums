@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Package, Tag, LogOut, ArrowLeft, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { LayoutDashboard, Package, Tag, Zap, LogOut, ArrowLeft, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 
 export default function Sidebar({ collapsed, onToggle }) {
@@ -11,6 +11,7 @@ export default function Sidebar({ collapsed, onToggle }) {
     { to: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/admin/produtos', icon: Package, label: 'Produtos' },
     { to: '/admin/marcas', icon: Tag, label: 'Marcas' },
+    { to: '/admin/promocoes', icon: Zap, label: 'Promoções' },
   ]
 
   return (

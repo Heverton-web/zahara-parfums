@@ -5,7 +5,7 @@ import Button from '../ui/Button'
 
 const inputClass = "w-full px-3 py-2.5 rounded-lg text-sm text-ivory placeholder-ivory/25 focus:outline-none transition-all bg-noir-800/50 border border-ivory/5 focus:border-gold/30 hover:border-ivory/10"
 
-export default function BulkPromotionModal({ isOpen, onClose, onSuccess }) {
+export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promocao = null }) {
   const [nome, setNome] = useState('')
   const [tag, setTag] = useState('SUPER PROMOÇÃO')
   const [dataInicio, setDataInicio] = useState('')
@@ -22,15 +22,27 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess }) {
   useEffect(() => {
     if (isOpen) {
       fetchProdutos()
-      // Default: início agora, fim em 7 dias
-      const now = new Date()
-      const weekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-      setDataInicio(formatDateTimeLocal(now))
-      setDataFim(formatDateTimeLocal(weekLater))
+      if (promocao) {
+        // Editar: preencher com dados existentes
+        setNome(promocao.nome)
+        setTag(promocao.tag || 'SUPER PROMOÇÃO')
+        setDataInicio(formatDateTimeLocal(new Date(promocao.data_inicio)))
+        setDataFim(formatDateTimeLocal(new Date(promocao.data_fim)))
+        setTipoDesconto(promocao.tipo_desconto)
+        setValorDesconto(String(promocao.valor_desconto))
+        // Buscar produtos vinculados
+        fetchProdutosVinculados(promocao.id)
+      } else {
+        // Criar: defaults
+        const now = new Date()
+        const weekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+        setDataInicio(formatDateTimeLocal(now))
+        setDataFim(formatDateTimeLocal(weekLater))
+      }
     } else {
       resetForm()
     }
-  }, [isOpen])
+  }, [isOpen, promocao])
 
   function formatDateTimeLocal(date) {
     const pad = n => String(n).padStart(2, '0')
@@ -66,6 +78,26 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess }) {
     setLoadingProdutos(false)
   }
 
+  async function fetchProdutosVinculados(promocaoId) {
+    try {
+      const { data: junction } = await supabase
+        .from('promocao_em_massa_produtos')
+        .select('produto_id')
+        .eq('promocao_em_massa_id', promocaoId)
+
+      const ids = (junction || []).map(j => j.produto_id)
+      if (ids.length > 0) {
+        const { data: prods } = await supabase
+          .from('produtos')
+          .select('id, nome, preco_original, em_promocao_em_massa')
+          .in('id', ids)
+        setProdutosSelecionados(prods || [])
+      }
+    } catch (err) {
+      console.error('Erro ao buscar produtos vinculados:', err)
+    }
+  }
+
   function toggleProduto(produto) {
     setProdutosSelecionados(prev => {
       const exists = prev.find(p => p.id === produto.id)
@@ -97,53 +129,83 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess }) {
     setLoading(true)
 
     try {
-      // 1. Criar promoção em massa
-      const { data: promocao, error: errPromocao } = await supabase
-        .from('promocoes_em_massa')
-        .insert({
-          nome: nome.trim(),
-          tag: tag.trim() || 'SUPER PROMOÇÃO',
-          data_inicio: new Date(dataInicio).toISOString(),
-          data_fim: new Date(dataFim).toISOString(),
-          tipo_desconto: tipoDesconto,
-          valor_desconto: Number(valorDesconto),
-        })
-        .select()
-        .single()
+      const isEdit = !!promocao
+      const novaTag = tag.trim() || 'SUPER PROMOÇÃO'
+      let promocaoId
 
-      if (errPromocao) throw errPromocao
+      if (isEdit) {
+        // 1. Atualizar promoção
+        const { error: errUpdate } = await supabase
+          .from('promocoes_em_massa')
+          .update({
+            nome: nome.trim(),
+            tag: novaTag,
+            data_inicio: new Date(dataInicio).toISOString(),
+            data_fim: new Date(dataFim).toISOString(),
+            tipo_desconto: tipoDesconto,
+            valor_desconto: Number(valorDesconto),
+          })
+          .eq('id', promocao.id)
+        if (errUpdate) throw errUpdate
+        promocaoId = promocao.id
 
-      // 2. Inserir junction produto ↔ promoção
+        // 2. Limpar produtos antigos
+        const { data: oldJunction } = await supabase
+          .from('promocao_em_massa_produtos')
+          .select('produto_id')
+          .eq('promocao_em_massa_id', promocao.id)
+
+        for (const j of (oldJunction || [])) {
+          const { data: prod } = await supabase.from('produtos').select('tags').eq('id', j.produto_id).single()
+          const tagsFiltradas = (prod?.tags || []).filter(t => t !== novaTag)
+          await supabase.from('produtos').update({
+            preco_em_massa: null, em_promocao_em_massa: false, promocao_em_massa_id: null, tags: tagsFiltradas,
+          }).eq('id', j.produto_id)
+        }
+
+        // 3. Deletar junction antiga
+        await supabase.from('promocao_em_massa_produtos').delete().eq('promocao_em_massa_id', promocao.id)
+      } else {
+        // Criar nova promoção
+        const { data: novaPromo, error: errPromocao } = await supabase
+          .from('promocoes_em_massa')
+          .insert({
+            nome: nome.trim(),
+            tag: novaTag,
+            data_inicio: new Date(dataInicio).toISOString(),
+            data_fim: new Date(dataFim).toISOString(),
+            tipo_desconto: tipoDesconto,
+            valor_desconto: Number(valorDesconto),
+          })
+          .select()
+          .single()
+        if (errPromocao) throw errPromocao
+        promocaoId = novaPromo.id
+      }
+
+      // 4. Inserir nova junction
       const junctionRows = produtosSelecionados.map(p => ({
-        promocao_em_massa_id: promocao.id,
+        promocao_em_massa_id: promocaoId,
         produto_id: p.id,
       }))
-
       const { error: errJunction } = await supabase
         .from('promocao_em_massa_produtos')
         .insert(junctionRows)
-
       if (errJunction) throw errJunction
 
-      // 3. Atualizar cada produto: preco_em_massa + em_promocao_em_massa + tag
+      // 5. Atualizar cada produto
       for (const produto of produtosSelecionados) {
         const precoEmMassa = calcularPrecoEmMassa(produto.preco_original)
-
-        // Substituir todas as tags pela tag da promoção em massa
-        const novaTag = tag.trim() || 'SUPER PROMOÇÃO'
-        const novasTags = [novaTag]
-
-        const { error: errUpdate } = await supabase
+        const { error: errProd } = await supabase
           .from('produtos')
           .update({
             preco_em_massa: precoEmMassa,
             em_promocao_em_massa: true,
-            promocao_em_massa_id: promocao.id,
-            tags: novasTags,
+            promocao_em_massa_id: promocaoId,
+            tags: [novaTag],
           })
           .eq('id', produto.id)
-
-        if (errUpdate) throw errUpdate
+        if (errProd) throw errProd
       }
 
       onSuccess()
@@ -174,7 +236,7 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess }) {
         <div className="flex items-center justify-between p-5 pb-0">
           <div>
             <h2 className="font-heading text-xl font-bold text-ivory">
-              Promoção em Massa
+              {promocao ? 'Editar Promoção' : 'Nova Promoção em Massa'}
             </h2>
             <div className="w-8 h-px bg-gradient-to-r from-gold/50 to-transparent mt-1.5" />
           </div>
@@ -412,7 +474,7 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess }) {
               ) : (
                 <Tag size={16} className="mr-2" />
               )}
-              Criar Promoção
+              {promocao ? 'Salvar Alterações' : 'Criar Promoção'}
             </Button>
           </div>
         </div>

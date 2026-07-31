@@ -11,6 +11,7 @@ import Login from './pages/admin/Login'
 import Dashboard from './pages/admin/Dashboard'
 import AdminProdutos from './pages/admin/Produtos'
 import MarcasAdmin from './pages/admin/MarcasAdmin'
+import PromocoesEmMassa from './pages/admin/PromocoesEmMassa'
 import AdminLayout from './components/layout/AdminLayout'
 
 function PublicLayout({ children }) {
@@ -40,6 +41,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="produtos" element={<AdminProdutos />} />
             <Route path="marcas" element={<MarcasAdmin />} />
+            <Route path="promocoes" element={<PromocoesEmMassa />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
