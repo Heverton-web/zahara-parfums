@@ -1,0 +1,50 @@
+{
+  "id": "f1a2b3c4-d5e6-7890-abcd-ef1234567890",
+  "title": "Hardcoded Admin Credentials in Source Code",
+  "cwe": "CWE-798",
+  "severity": "CRITICAL",
+  "status": "VALID",
+  "description": "The script scripts/create-admins.mjs contains hardcoded admin email addresses and passwords in plaintext source code. Two admin accounts share the same password 'Khen741963'. These credentials are committed to the Git repository and are readable by anyone with repository access.",
+  "impact": "An attacker with repository access gains immediate admin credentials. If the repository is public or compromised, attackers can create admin accounts or take over existing ones. The shared password means compromising one admin account compromises all.",
+  "code_paths": ["scripts/create-admins.mjs:28-29"],
+  "attacker_position": "SUPPLY_CHAIN",
+  "privileges_required": "NONE",
+  "user_interaction": "NONE",
+  "mitigation": "Remove hardcoded credentials from source code. Use environment variables or a secrets manager. Rotate all exposed credentials immediately. Implement unique passwords per admin account.",
+  "production_viability": "VIABLE",
+  "critic_reasoning": "The credentials are in a utility script that is part of the deployed codebase. Anyone with repository access (developers, CI/CD, contractors) can read them. The script uses the anon key, so the credentials are also exposed via the client bundle. This is a real, production-reachable flaw.",
+  "impact_score": 5,
+  "likelihood_score": 4,
+  "inferred_exposure": "SUPPLY_CHAIN",
+  "attacker_position_score": "SUPPLY_CHAIN",
+  "mantis_risk_score": 9,
+  "priority": "CRITICAL",
+  "outrage_commentary": "Hardcoded credentials in source code are a top-tier security anti-pattern. The shared password across accounts amplifies the blast radius. Immediate remediation required.",
+  "executive_summary": "Admin credentials are hardcoded in plaintext in a committed script. Any repository collaborator can read them. The shared password means a single compromise affects all admin accounts.",
+  "history": [
+    {
+      "stage": "researcher",
+      "action": "discovered",
+      "timestamp": "2026-07-30T00:00:00Z",
+      "details": "Found plaintext admin credentials in create-admins.mjs lines 28-29"
+    },
+    {
+      "stage": "reviewer",
+      "action": "validated",
+      "timestamp": "2026-07-30T00:01:00Z",
+      "details": "Verified: credentials are plaintext in source, shared password across accounts"
+    },
+    {
+      "stage": "critic",
+      "action": "viability_assessed",
+      "timestamp": "2026-07-30T00:02:00Z",
+      "details": "VIABLE: script is part of deployed codebase, credentials readable by repository access"
+    },
+    {
+      "stage": "calibrate",
+      "action": "risk_scored",
+      "timestamp": "2026-07-30T00:03:00Z",
+      "details": "Impact 5 (full admin compromise), Likelihood 4 (requires repo access, common threat)"
+    }
+  ]
+}

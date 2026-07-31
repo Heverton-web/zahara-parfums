@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, Check, Image as ImageIcon, Link2, Loader2, Sparkles, Search } from 'lucide-react'
 import { createProduto, updateProduto } from '../../hooks/useProdutos'
-import { searchAndScrape, scrapeFragrantica, isFragranticaUrl, matchMarca, openFragranticaSearch } from '../../lib/fragrantica'
+import { searchAndScrape, scrapeFragrantica, isFragranticaUrl, matchMarca, openFragranticaSearch, parseFragranticaUrl, validateFragranticaUrl } from '../../lib/fragrantica'
 
 const generos = [
   { value: 'masculino', label: 'Masculino' },
@@ -120,6 +120,24 @@ export default function FormProduto({ produto, marcas = [], onSuccess, onCancel 
     const url = e.target.value
     setForm(prev => ({ ...prev, imagem_url: url }))
     if (url) setPreview(url)
+  }
+
+  // Auto-preencher quando URL do Fragrantica é colada
+  function handleFragranticaUrlPaste(e) {
+    const url = e.target.value
+    setFragUrl(url)
+    if (!validateFragranticaUrl(url)) return
+    const parsed = parseFragranticaUrl(url)
+    if (!parsed) return
+    setForm(prev => ({
+      ...prev,
+      nome: parsed.name || prev.nome,
+    }))
+    if (parsed.brand && marcas.length > 0) {
+      const matched = matchMarca(parsed.brand, marcas)
+      if (matched) setForm(prev => ({ ...prev, marca_id: matched.id }))
+    }
+    setScrapeMsg('Marca e nome extraídos da URL!')
   }
 
   // Buscar perfume por nome

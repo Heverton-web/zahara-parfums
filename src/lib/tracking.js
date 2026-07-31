@@ -14,7 +14,7 @@ export function parseUserAgent(ua) {
 
 export async function getCountry(ip) {
   try {
-    const res = await fetch(`http://ip-api.com/json/${ip}`)
+    const res = await fetch(`https://ip-api.com/json/${ip}`)
     const data = await res.json()
     return data.country || 'Desconhecido'
   } catch {

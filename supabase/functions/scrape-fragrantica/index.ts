@@ -5,7 +5,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': '*',  // Restrict in production
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
@@ -51,6 +51,24 @@ const HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
   'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+}
+
+// SSRF Protection: URL allowlist
+const ALLOWED_HOSTS = ['www.fragrantica.com.br', 'www.fragrantica.com', 'fragrantica.com.br', 'fragrantica.com']
+
+function isAllowedUrl(urlStr: string): boolean {
+  try {
+    const url = new URL(urlStr)
+    if (!ALLOWED_HOSTS.includes(url.hostname)) return false
+    if (url.protocol !== 'https:') return false
+    // Block internal IPs
+    const hostname = url.hostname
+    if (hostname.startsWith('127.') || hostname.startsWith('10.') || 
+        hostname.startsWith('192.168.') || hostname.startsWith('172.')) return false
+    return true
+  } catch {
+    return false
+  }
 }
 
 async function searchPerfume(query: string) {
@@ -122,6 +140,7 @@ function parseSearchResults(html: string, originalQuery: string) {
 }
 
 async function scrapeProductPage(url: string) {
+  if (!isAllowedUrl(url)) throw new Error('URL not allowed')
   const resp = await fetch(url, { headers: HEADERS, redirect: 'follow' })
   if (!resp.ok) throw new Error(`Fetch failed: ${resp.status}`)
   

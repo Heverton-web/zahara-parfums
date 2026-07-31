@@ -1,0 +1,50 @@
+{
+  "id": "a2b3c4d5-e6f7-8901-bcde-f12345678901",
+  "title": "Broken Access Control — Any Authenticated User Gets Full Admin Privileges",
+  "cwe": "CWE-862",
+  "severity": "HIGH",
+  "status": "VALID",
+  "description": "RLS policies in supabase/schema.sql use `auth.role() = 'authenticated'` to grant full CRUD access to the produtos, marcas, and config tables. This means ANY authenticated user (not just admins) can create, update, and delete all products, brands, and configuration. The AdminLayout.jsx client-side guard checks only `user` truthiness — there is no role-based verification.",
+  "impact": "Any user who creates an account (or any compromised account) gains full administrative access: create/edit/delete products, modify brands, change configuration. A malicious user could deface the store, manipulate pricing, or delete all products.",
+  "code_paths": ["supabase/schema.sql:67-75", "src/components/layout/AdminLayout.jsx:19-21"],
+  "attacker_position": "EXTERNAL",
+  "privileges_required": "LOW",
+  "user_interaction": "NONE",
+  "mitigation": "Implement role-based access control. Add a `role` column to a user profiles table. Update RLS policies to check `auth.jwt() ->> 'role' = 'admin'` instead of just `auth.role() = 'authenticated'`. Add server-side role verification for all admin operations.",
+  "production_viability": "VIABLE",
+  "critic_reasoning": "The RLS policies are active in the production database. Any user who can sign up (Supabase allows self-registration by default) gets full admin CRUD. The client-side guard is trivially bypassable. This is a live, exploitable access control flaw.",
+  "impact_score": 4,
+  "likelihood_score": 5,
+  "inferred_exposure": "EXTERNAL",
+  "attacker_position_score": "EXTERNAL",
+  "mantis_risk_score": 9,
+  "priority": "HIGH",
+  "outrage_commentary": "Broken access control is the #1 OWASP vulnerability. Any authenticated user becomes a full admin — this is a critical design flaw in the security architecture.",
+  "executive_summary": "RLS policies grant full admin CRUD to any authenticated user without role checking. A simple account creation gives complete control over all products, brands, and configuration.",
+  "history": [
+    {
+      "stage": "researcher",
+      "action": "discovered",
+      "timestamp": "2026-07-30T00:00:00Z",
+      "details": "RLS policies grant full CRUD to any authenticated user without role checking"
+    },
+    {
+      "stage": "reviewer",
+      "action": "validated",
+      "timestamp": "2026-07-30T00:01:00Z",
+      "details": "Verified: auth.role() = 'authenticated' used in all admin RLS policies"
+    },
+    {
+      "stage": "critic",
+      "action": "viability_assessed",
+      "timestamp": "2026-07-30T00:02:00Z",
+      "details": "VIABLE: RLS policies are active in production, self-registration likely enabled"
+    },
+    {
+      "stage": "calibrate",
+      "action": "risk_scored",
+      "timestamp": "2026-07-30T00:03:00Z",
+      "details": "Impact 4 (full admin takeover), Likelihood 5 (trivial to exploit with any account)"
+    }
+  ]
+}

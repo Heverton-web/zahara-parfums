@@ -34,6 +34,25 @@ export function isFragranticaUrl(url) {
   return url && url.includes('fragrantica.com')
 }
 
+// Padrão: fragrantica.com.br/perfume/{Marca}/{Nome-Perfume}-{ID}.html
+// Ex: fragrantica.com.br/perfume/Creed/Aventus-for-Her-38497.html
+// Ex: fragrantica.com.br/perfume/French-Avenue/Liquid-Brun-94713.html
+const FRAGRANTICA_PERFUME_RE = /fragrantica\.com\.?\w*\/perfume\/([^/]+)\/([^-]+)-(\d+)\.html/
+
+export function parseFragranticaUrl(url) {
+  const match = url?.match(FRAGRANTICA_PERFUME_RE)
+  if (!match) return null
+  return {
+    brand: match[1].replace(/-/g, ' '),
+    name: match[2].replace(/-/g, ' '),
+    id: match[3],
+  }
+}
+
+export function validateFragranticaUrl(url) {
+  return FRAGRANTICA_PERFUME_RE.test(url)
+}
+
 export function matchMarca(searchBrand, marcas) {
   if (!searchBrand || !marcas?.length) return null
   

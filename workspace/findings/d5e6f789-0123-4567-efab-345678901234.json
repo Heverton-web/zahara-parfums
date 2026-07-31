@@ -1,0 +1,50 @@
+{
+  "id": "d5e6f789-0123-4567-efab-345678901234",
+  "title": "Cleartext Storage of PII in Tracking Table",
+  "cwe": "CWE-312",
+  "severity": "MEDIUM",
+  "status": "VALID",
+  "description": "The tracking table stores IP addresses, user agent strings, canvas fingerprints, and referrer URLs in plaintext. There is no encryption at rest, no data retention policy, and no way to delete tracking data (no DELETE RLS policy). This constitutes PII storage without adequate protection.",
+  "impact": "If the Supabase database is compromised, all visitor tracking data (IPs, fingerprints, browsing patterns) is exposed in cleartext. The absence of a DELETE policy means data cannot be purged even if requested (potential GDPR violation). The fingerprint is a persistent identifier that can track users across sessions.",
+  "code_paths": ["supabase/schema.sql:18-30", "src/lib/tracking.js:28-38"],
+  "attacker_position": "EXTERNAL",
+  "privileges_required": "LOW",
+  "user_interaction": "NONE",
+  "mitigation": "Implement data retention policies (auto-delete after N days). Add DELETE RLS policy for admin users. Consider anonymizing IP addresses (truncate last octet). Encrypt fingerprint data. Implement a data purge mechanism for GDPR compliance.",
+  "production_viability": "VIABLE",
+  "critic_reasoning": "The tracking table is actively collecting data in production. The plaintext storage and lack of deletion mechanism are live issues. GDPR/privacy compliance is a real legal risk.",
+  "impact_score": 3,
+  "likelihood_score": 2,
+  "inferred_exposure": "INTERNAL",
+  "attacker_position_score": "EXTERNAL",
+  "mantis_risk_score": 4,
+  "priority": "MEDIUM",
+  "outrage_commentary": "Storing IP addresses and fingerprints in plaintext without retention policies is a privacy compliance risk. The lack of deletion capability is particularly concerning for GDPR.",
+  "executive_summary": "The tracking table stores PII (IPs, fingerprints, user agents) in plaintext with no encryption, no retention policy, and no deletion mechanism. This creates privacy compliance risks.",
+  "history": [
+    {
+      "stage": "researcher",
+      "action": "discovered",
+      "timestamp": "2026-07-30T00:00:00Z",
+      "details": "PII stored in plaintext with no retention policy or deletion mechanism"
+    },
+    {
+      "stage": "reviewer",
+      "action": "validated",
+      "timestamp": "2026-07-30T00:01:00Z",
+      "details": "Verified: tracking table schema stores IP, fingerprint, user_agent as TEXT"
+    },
+    {
+      "stage": "critic",
+      "action": "viability_assessed",
+      "timestamp": "2026-07-30T00:02:00Z",
+      "details": "VIABLE: actively collecting PII in production, no deletion mechanism"
+    },
+    {
+      "stage": "calibrate",
+      "action": "risk_scored",
+      "timestamp": "2026-07-30T00:03:00Z",
+      "details": "Impact 3 (privacy violation), Likelihood 2 (requires DB compromise or insider access)"
+    }
+  ]
+}

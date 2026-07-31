@@ -1,0 +1,50 @@
+{
+  "id": "c4d5e6f7-8901-2345-defa-234567890123",
+  "title": "Cleartext HTTP Transmission of IP Address and Geolocation Data",
+  "cwe": "CWE-319",
+  "severity": "MEDIUM",
+  "status": "VALID",
+  "description": "The tracking module in src/lib/tracking.js calls `http://ip-api.com/json/${ip}` over plain HTTP (not HTTPS). This transmits the user's IP address in cleartext, allowing network-level attackers to intercept and modify the geolocation lookup. The response (country data) is also received in cleartext and could be tampered with.",
+  "impact": "An attacker on the same network (e.g., public WiFi, compromised router) can intercept IP addresses and geolocation data. They can also modify the response to inject false location data, potentially affecting analytics and regional content.",
+  "code_paths": ["src/lib/tracking.js:17"],
+  "attacker_position": "INTERNAL_NETWORK",
+  "privileges_required": "NONE",
+  "user_interaction": "REQUIRED",
+  "mitigation": "Replace `http://ip-api.com` with `https://ip-api.com`. The free tier of ip-api.com supports HTTPS. Consider using a more privacy-respecting geolocation service.",
+  "production_viability": "VIABLE",
+  "critic_reasoning": "The HTTP call is in production code, executed on every page view and click. The vulnerability is trivially exploitable by any network-level attacker (MitM). This is a standard, well-understood attack vector.",
+  "impact_score": 2,
+  "likelihood_score": 3,
+  "inferred_exposure": "INTERNAL",
+  "attacker_position_score": "INTERNAL_NETWORK",
+  "mantis_risk_score": 4,
+  "priority": "MEDIUM",
+  "outrage_commentary": "Using HTTP instead of HTTPS for external API calls is a basic security hygiene issue. The fix is trivial (change http to https).",
+  "executive_summary": "The tracking module sends IP addresses over plain HTTP to ip-api.com. Network-level attackers can intercept this data or inject false geolocation results.",
+  "history": [
+    {
+      "stage": "researcher",
+      "action": "discovered",
+      "timestamp": "2026-07-30T00:00:00Z",
+      "details": "HTTP used for geolocation API call instead of HTTPS"
+    },
+    {
+      "stage": "reviewer",
+      "action": "validated",
+      "timestamp": "2026-07-30T00:01:00Z",
+      "details": "Verified: http://ip-api.com used in tracking.js line 17"
+    },
+    {
+      "stage": "critic",
+      "action": "viability_assessed",
+      "timestamp": "2026-07-30T00:02:00Z",
+      "details": "VIABLE: production code, trivially exploitable MitM"
+    },
+    {
+      "stage": "calibrate",
+      "action": "risk_scored",
+      "timestamp": "2026-07-30T00:03:00Z",
+      "details": "Impact 2 (data interception), Likelihood 3 (requires network position)"
+    }
+  ]
+}

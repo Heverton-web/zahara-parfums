@@ -1,0 +1,50 @@
+{
+  "id": "b3c4d5e6-f789-0123-cdef-123456789012",
+  "title": "SSRF via Fragrantica Edge Function URL Parameter",
+  "cwe": "CWE-918",
+  "severity": "HIGH",
+  "status": "VALID",
+  "description": "The Supabase Edge Function scrape-fragrantica accepts a `url` parameter from the client and passes it to `fetch()` after only checking `url.includes('fragrantica.com')`. This check is bypassable: an attacker can craft URLs like `https://fragrantica.com.evil.com/`, `https://fragrantica.com@attacker.com/`, or use URL parsing tricks to reach internal services. The function also accepts a `query` parameter that is interpolated into a search URL without domain restriction.",
+  "impact": "An attacker can use the edge function as a proxy to scan internal Supabase infrastructure, access internal APIs, or exfiltrate data from internal services. The Deno runtime may have access to environment variables or internal network resources.",
+  "code_paths": ["supabase/functions/scrape-fragrantica/index.ts:25-30", "supabase/functions/scrape-fragrantica/index.ts:58-60"],
+  "attacker_position": "EXTERNAL",
+  "privileges_required": "NONE",
+  "user_interaction": "NONE",
+  "mitigation": "Implement a strict URL allowlist. Parse the URL and validate the hostname against a whitelist (only `www.fragrantica.com.br` and `www.fragrantica.com`). Use `new URL()` to parse and validate. Block all internal/private IP ranges. Add rate limiting.",
+  "production_viability": "VIABLE",
+  "critic_reasoning": "The edge function is deployed and publicly accessible. The URL validation is a simple string.includes() which is well-known to be bypassable. The function makes server-side requests with the Deno runtime's network access. This is a live SSRF vector.",
+  "impact_score": 4,
+  "likelihood_score": 3,
+  "inferred_exposure": "EXTERNAL",
+  "attacker_position_score": "EXTERNAL",
+  "mantis_risk_score": 7,
+  "priority": "HIGH",
+  "outrage_commentary": "SSRF in a serverless function with weak URL validation is a serious issue. The function runs in the Supabase infrastructure with potential access to internal services.",
+  "executive_summary": "The Fragrantica edge function accepts user-supplied URLs with weak validation (string.includes). An attacker can bypass the check to probe internal infrastructure or use the function as an open proxy.",
+  "history": [
+    {
+      "stage": "researcher",
+      "action": "discovered",
+      "timestamp": "2026-07-30T00:00:00Z",
+      "details": "Edge function URL validation is weak — string.includes() bypassable via URL tricks"
+    },
+    {
+      "stage": "reviewer",
+      "action": "validated",
+      "timestamp": "2026-07-30T00:01:00Z",
+      "details": "Verified: url.includes('fragrantica.com') is the only validation before fetch()"
+    },
+    {
+      "stage": "critic",
+      "action": "viability_assessed",
+      "timestamp": "2026-07-30T00:02:00Z",
+      "details": "VIABLE: edge function is deployed, validation is demonstrably bypassable"
+    },
+    {
+      "stage": "calibrate",
+      "action": "risk_scored",
+      "timestamp": "2026-07-30T00:03:00Z",
+      "details": "Impact 4 (infrastructure access), Likelihood 3 (requires crafting bypass URL)"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "id": "e6f78901-2345-5678-fabc-456789012345",
+  "title": "CORS Wildcard and Error Information Disclosure in Edge Function",
+  "cwe": "CWE-942",
+  "severity": "LOW",
+  "status": "VALID",
+  "description": "The scrape-fragrantica edge function sets `Access-Control-Allow-Origin: *` (wildcard CORS), allowing any website to invoke it. Additionally, error messages from `error.message` are returned directly to the client, potentially leaking internal implementation details (Deno runtime errors, stack traces, file paths).",
+  "impact": "Any website can call the edge function, using it as a free proxy. Error messages may reveal internal paths, runtime versions, or dependency information useful for further attacks.",
+  "code_paths": ["supabase/functions/scrape-fragrantica/index.ts:5-8", "supabase/functions/scrape-fragrantica/index.ts:38-40"],
+  "attacker_position": "EXTERNAL",
+  "privileges_required": "NONE",
+  "user_interaction": "REQUIRED",
+  "mitigation": "Restrict CORS to specific allowed origins. Sanitize error messages before returning to client — log full errors server-side, return generic messages to client.",
+  "production_viability": "VIABLE",
+  "critic_reasoning": "The edge function is deployed with wildcard CORS. Any website can invoke it. This is a live configuration issue, though the practical impact is lower than the other findings.",
+  "impact_score": 2,
+  "likelihood_score": 3,
+  "inferred_exposure": "EXTERNAL",
+  "attacker_position_score": "EXTERNAL",
+  "mantis_risk_score": 4,
+  "priority": "LOW",
+  "outrage_commentary": "Wildcard CORS is a common misconfiguration. The error disclosure is a secondary concern. Practical exploitation requires a motivated attacker to host a malicious page.",
+  "executive_summary": "The edge function uses wildcard CORS, allowing any website to invoke it as a proxy. Error messages may leak internal implementation details.",
+  "history": [
+    {
+      "stage": "researcher",
+      "action": "discovered",
+      "timestamp": "2026-07-30T00:00:00Z",
+      "details": "Wildcard CORS and raw error messages in edge function response"
+    },
+    {
+      "stage": "reviewer",
+      "action": "validated",
+      "timestamp": "2026-07-30T00:01:00Z",
+      "details": "Verified: Access-Control-Allow-Origin: * and error.message returned to client"
+    },
+    {
+      "stage": "critic",
+      "action": "viability_assessed",
+      "timestamp": "2026-07-30T00:02:00Z",
+      "details": "VIABLE: deployed with wildcard CORS, any website can invoke"
+    },
+    {
+      "stage": "calibrate",
+      "action": "risk_scored",
+      "timestamp": "2026-07-30T00:03:00Z",
+      "details": "Impact 2 (proxy abuse, info leak), Likelihood 3 (requires hosting malicious page)"
+    }
+  ]
+}

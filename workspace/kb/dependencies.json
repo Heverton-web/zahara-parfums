@@ -1,0 +1,18 @@
+{
+  "src/App.jsx": ["src/hooks/useAuth.jsx", "src/pages/admin/Login.jsx", "src/pages/admin/Dashboard.jsx", "src/pages/admin/Produtos.jsx", "src/pages/admin/MarcasAdmin.jsx", "src/components/layout/AdminLayout.jsx", "src/pages/Home.jsx", "src/pages/Loja.jsx", "src/pages/Produto.jsx", "src/pages/Marcas.jsx", "src/pages/NotFound.jsx"],
+  "src/hooks/useAuth.jsx": ["src/lib/supabase.js"],
+  "src/hooks/useProdutos.jsx": ["src/lib/supabase.js", "src/data/mock.js"],
+  "src/hooks/useTracking.jsx": ["src/lib/tracking.js"],
+  "src/lib/tracking.js": ["src/lib/supabase.js"],
+  "src/lib/whatsapp.js": [],
+  "src/lib/fragrantica.js": ["src/lib/supabase.js"],
+  "src/lib/supabase.js": [],
+  "src/components/product/FormProduto.jsx": ["src/hooks/useProdutos.jsx", "src/lib/fragrantica.js"],
+  "src/components/product/WhatsAppModal.jsx": [],
+  "src/components/layout/AdminLayout.jsx": ["src/hooks/useAuth.jsx", "src/components/layout/Sidebar.jsx"],
+  "src/pages/admin/Login.jsx": ["src/hooks/useAuth.jsx"],
+  "src/pages/admin/Produtos.jsx": ["src/hooks/useProdutos.jsx"],
+  "src/pages/Produto.jsx": ["src/hooks/useProdutos.jsx", "src/hooks/useTracking.jsx", "src/components/product/WhatsAppModal.jsx"],
+  "supabase/functions/scrape-fragrantica/index.ts": [],
+  "scripts/create-admins.mjs": ["src/lib/supabase.js"]
+}
