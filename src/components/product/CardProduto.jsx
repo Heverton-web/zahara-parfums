@@ -84,16 +84,13 @@ export default function CardProduto({ produto }) {
 
                 if (emMassa && precoEmMassa) {
                   return (
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-white/50 line-through text-sm drop-shadow-lg">
-                          R$ {preco.toFixed(2)}
-                        </span>
-                        <span className="text-emerald-400 font-bold text-lg drop-shadow-lg">
-                          R$ {precoEmMassa.toFixed(2)}
-                        </span>
-                      </div>
-                      <CountdownTimer dataFim={produto.promocoes_em_massa.data_fim} size="sm" />
+                    <div className="flex items-center gap-2">
+                      <span className="text-white/50 line-through text-sm drop-shadow-lg">
+                        R$ {preco.toFixed(2)}
+                      </span>
+                      <span className="text-emerald-400 font-bold text-lg drop-shadow-lg">
+                        R$ {precoEmMassa.toFixed(2)}
+                      </span>
                     </div>
                   )
                 }
@@ -132,6 +129,16 @@ export default function CardProduto({ produto }) {
               {produto.nome}
             </h3>
           </Link>
+
+          {/* Timer promoção em massa */}
+          {(() => {
+            const emMassa = produto.em_promocao_em_massa && produto.promocoes_em_massa?.data_fim && new Date(produto.promocoes_em_massa.data_fim) > new Date()
+            return emMassa ? (
+              <div className="mb-3">
+                <CountdownTimer dataFim={produto.promocoes_em_massa.data_fim} size="md" />
+              </div>
+            ) : null
+          })()}
 
           {/* Botão WhatsApp */}
           <button
