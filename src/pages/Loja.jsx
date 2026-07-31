@@ -3,6 +3,7 @@ import { useProdutos, useMarcas } from '../hooks/useProdutos'
 import { Gem, SlidersHorizontal, X } from 'lucide-react'
 import Filtros from '../components/product/Filtros'
 import ListaProdutos from '../components/product/ListaProdutos'
+import SuperPromocoes from '../components/product/SuperPromocoes'
 
 export default function Loja() {
   const [filtros, setFiltros] = useState({ genero: '', marca: '', tag: '' })
@@ -36,6 +37,9 @@ export default function Loja() {
           </div>
         </div>
       </div>
+
+      {/* Super Promoções */}
+      <SuperPromocoes />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Mobile filter toggle */}

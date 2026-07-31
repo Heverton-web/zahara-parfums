@@ -89,7 +89,7 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promoca
       if (ids.length > 0) {
         const { data: prods } = await supabase
           .from('produtos')
-          .select('id, nome, preco_original, em_promocao_em_massa')
+          .select('id, nome, preco_original, em_promocao_em_massa, promocao_em_massa_id')
           .in('id', ids)
         setProdutosSelecionados(prods || [])
       }
@@ -108,11 +108,13 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promoca
 
   function calcularPrecoEmMassa(precoOriginal) {
     if (!valorDesconto || !precoOriginal) return precoOriginal
-    const val = Number(valorDesconto)
+    const val = Number(String(valorDesconto).replace(',', '.'))
+    if (isNaN(val) || val <= 0) return precoOriginal
+    const preco = Number(precoOriginal)
     if (tipoDesconto === 'fixo') {
-      return Math.max(0, precoOriginal - val)
+      return Math.max(0, preco - val)
     }
-    return Math.max(0, precoOriginal * (1 - val / 100))
+    return Math.max(0, preco * (1 - val / 100))
   }
 
   async function handleSubmit(e) {
@@ -143,7 +145,7 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promoca
             data_inicio: new Date(dataInicio).toISOString(),
             data_fim: new Date(dataFim).toISOString(),
             tipo_desconto: tipoDesconto,
-            valor_desconto: Number(valorDesconto),
+            valor_desconto: Number(String(valorDesconto).replace(',', '.')),
           })
           .eq('id', promocao.id)
         if (errUpdate) throw errUpdate
@@ -175,7 +177,7 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promoca
             data_inicio: new Date(dataInicio).toISOString(),
             data_fim: new Date(dataFim).toISOString(),
             tipo_desconto: tipoDesconto,
-            valor_desconto: Number(valorDesconto),
+            valor_desconto: Number(String(valorDesconto).replace(',', '.')),
           })
           .select()
           .single()

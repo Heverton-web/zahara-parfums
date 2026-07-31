@@ -1,0 +1,81 @@
+import { useState, useEffect } from 'react'
+import { supabase } from '../../lib/supabase'
+import { Flame } from 'lucide-react'
+import CardProduto from './CardProduto'
+
+export default function SuperPromocoes() {
+  const [produtos, setProdutos] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchSuperPromocoes()
+  }, [])
+
+  async function fetchSuperPromocoes() {
+    try {
+      const { data, error } = await supabase
+        .from('produtos')
+        .select('*, marcas(id, nome, logo_url), promocoes_em_massa(id, nome, data_fim, tag)')
+        .eq('em_promocao_em_massa', true)
+        .eq('ativo', true)
+        .order('nome')
+
+      if (error) throw error
+
+      // Filtrar apenas produtos com promoção ativa (data_fim > agora)
+      const now = new Date()
+      const ativos = (data || []).filter(p =>
+        p.promocoes_em_massa?.data_fim && new Date(p.promocoes_em_massa.data_fim) > now
+      )
+
+      setProdutos(ativos)
+    } catch (err) {
+      console.warn('Erro ao buscar super promoções:', err)
+    }
+    setLoading(false)
+  }
+
+  if (loading || produtos.length === 0) return null
+
+  return (
+    <section className="py-16 sm:py-24 bg-noir-950 relative overflow-hidden">
+      {/* Background decorativo */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-red-500/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[200px] bg-gold/5 rounded-full blur-[100px]" />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+        {/* Header */}
+        <div className="text-center mb-10 sm:mb-14">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4 sm:mb-6"
+            style={{
+              background: 'rgba(239, 68, 68, 0.08)',
+              border: '1px solid rgba(239, 68, 68, 0.25)',
+            }}
+          >
+            <Flame size={16} className="text-red-400 animate-pulse" />
+            <span className="text-red-400 text-xs sm:text-sm font-bold uppercase tracking-wider">
+              Super Promoção
+            </span>
+          </div>
+
+          <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-ivory mb-3 sm:mb-4">
+            Ofertas <span className="text-red-400">Imperdíveis</span>
+          </h2>
+          <div className="w-16 sm:w-20 h-px bg-gradient-to-r from-transparent via-red-400/50 to-transparent mx-auto mb-4 sm:mb-6" />
+          <p className="font-display text-ivory/40 sm:text-ivory/50 italic text-sm sm:text-base max-w-xl mx-auto">
+            Aproveite nossas promoções exclusivas com preços especiais por tempo limitado
+          </p>
+        </div>
+
+        {/* Products grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+          {produtos.map(produto => (
+            <CardProduto key={produto.id} produto={produto} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}

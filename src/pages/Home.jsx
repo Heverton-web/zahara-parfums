@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useProdutos } from '../hooks/useProdutos'
 import { Sparkles, Crown, Gem } from 'lucide-react'
 import CardProduto from '../components/product/CardProduto'
+import SuperPromocoes from '../components/product/SuperPromocoes'
 
 export default function Home() {
   const { produtos } = useProdutos({ ativo: true })
@@ -171,6 +172,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Super Promoções */}
+      <SuperPromocoes />
 
       {/* Brand Banner */}
       <section className="py-20 sm:py-28 bg-noir-950 relative overflow-hidden">
