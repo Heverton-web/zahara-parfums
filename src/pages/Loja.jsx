@@ -19,26 +19,7 @@ export default function Loja() {
   const activeFiltersCount = Object.values(filtros).filter(v => v).length
 
   return (
-    <div className="min-h-screen bg-noir-950 pt-16 sm:pt-20 pb-12 sm:pb-16">
-      {/* Hero section */}
-      <div className="relative py-10 sm:py-16 mb-6 sm:mb-12">
-        <div className="absolute inset-0 bg-pattern-arabic opacity-20" />
-        <div className="absolute inset-0 bg-gradient-to-b from-noir-950/80 to-noir-950" />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center">
-          <p className="font-accent text-[10px] sm:text-sm uppercase tracking-[0.2em] sm:tracking-[0.3em] text-gold/60 mb-3 sm:mb-4">
-            Coleção Exclusiva
-          </p>
-          <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
-            <span className="text-ivory">Nossos </span>
-            <span className="text-gradient-gold">Perfumes</span>
-          </h1>
-          <div className="ornate-divider">
-            <span>✦</span>
-          </div>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-noir-950">
       {/* Super Promoções */}
       <SuperPromocoes />
 
