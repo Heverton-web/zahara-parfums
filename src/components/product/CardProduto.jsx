@@ -57,15 +57,21 @@ export default function CardProduto({ produto }) {
             <div className="absolute inset-0 bg-gradient-to-t from-noir-950/90 via-noir-950/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
             
             {/* Tags */}
-            {produto.tags?.length > 0 && (
-              <div className="absolute top-3 left-3 flex gap-1.5 z-10">
-                {produto.tags.slice(0, 2).map((tag) => (
-                  <Badge key={tag} variant={tagColors[tag] || 'default'} className="px-2.5 py-1 backdrop-blur-sm">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
+            {(() => {
+              const emMassa = produto.em_promocao_em_massa && produto.promocoes_em_massa?.data_fim && new Date(produto.promocoes_em_massa.data_fim) > new Date()
+              const tagsVisiveis = emMassa
+                ? ['SUPER PROMOÇÃO']
+                : (produto.tags || []).filter(t => t !== 'SUPER PROMOÇÃO')
+              return tagsVisiveis.length > 0 ? (
+                <div className="absolute top-3 left-3 flex gap-1.5 z-10">
+                  {tagsVisiveis.slice(0, 2).map((tag) => (
+                    <Badge key={tag} variant={tagColors[tag] || 'default'} className="px-2.5 py-1 backdrop-blur-sm">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              ) : null
+            })()}
             
             {/* Preço sobreposto na imagem */}
             <div className="absolute bottom-3 left-3">

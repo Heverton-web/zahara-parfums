@@ -111,15 +111,21 @@ export default function Produto() {
           {/* Details section */}
           <div className="flex flex-col">
             {/* Tags */}
-            {produto.tags?.length > 0 && (
-              <div className="flex gap-2 mb-3 sm:mb-4">
-                {produto.tags.map((tag) => (
-                  <Badge key={tag} variant={tagColors[tag] || 'default'}>
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
+            {(() => {
+              const emMassa = produto.em_promocao_em_massa && produto.promocoes_em_massa?.data_fim && new Date(produto.promocoes_em_massa.data_fim) > new Date()
+              const tagsVisiveis = emMassa
+                ? ['SUPER PROMOÇÃO']
+                : (produto.tags || []).filter(t => t !== 'SUPER PROMOÇÃO')
+              return tagsVisiveis.length > 0 ? (
+                <div className="flex gap-2 mb-3 sm:mb-4">
+                  {tagsVisiveis.map((tag) => (
+                    <Badge key={tag} variant={tagColors[tag] || 'default'}>
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              ) : null
+            })()}
 
             {/* Brand */}
             <p className="font-accent text-[10px] sm:text-sm uppercase tracking-[0.15em] sm:tracking-[0.2em] text-gold/50 sm:text-gold/60 mb-1 sm:mb-2">

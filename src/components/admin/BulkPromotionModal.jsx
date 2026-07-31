@@ -129,18 +129,9 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess }) {
       for (const produto of produtosSelecionados) {
         const precoEmMassa = calcularPrecoEmMassa(produto.preco_original)
 
-        // Buscar tags atuais e adicionar a tag da promoção
-        const { data: prodAtual } = await supabase
-          .from('produtos')
-          .select('tags')
-          .eq('id', produto.id)
-          .single()
-
-        const tagsAtuais = prodAtual?.tags || []
+        // Substituir todas as tags pela tag da promoção em massa
         const novaTag = tag.trim() || 'SUPER PROMOÇÃO'
-        const novasTags = tagsAtuais.includes(novaTag)
-          ? tagsAtuais
-          : [...tagsAtuais, novaTag]
+        const novasTags = [novaTag]
 
         const { error: errUpdate } = await supabase
           .from('produtos')
