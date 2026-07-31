@@ -38,7 +38,7 @@ export default function CardProduto({ produto }) {
       >
         {/* Image container */}
         <Link to={`/produto/${produto.id}`} className="block">
-          <div className="bg-noir-800 relative overflow-hidden" style={{ minHeight: '280px' }}>
+          <div className="bg-noir-800 relative overflow-hidden aspect-[3/4]">
             {produto.imagem_url && !imageError ? (
               <img
                 src={produto.imagem_url}
@@ -74,7 +74,7 @@ export default function CardProduto({ produto }) {
             })()}
             
             {/* Preço sobreposto na imagem */}
-            <div className="absolute bottom-3 left-3">
+            <div className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-auto">
               {(() => {
                 const preco = Number(produto.preco_original) || 0
                 const precoPromo = Number(produto.preco_promocional) || preco
@@ -84,11 +84,11 @@ export default function CardProduto({ produto }) {
 
                 if (emMassa && precoEmMassa) {
                   return (
-                    <div className="flex items-center gap-2">
-                      <span className="text-white/50 line-through text-sm drop-shadow-lg">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-white/50 line-through text-[10px] sm:text-sm drop-shadow-lg">
                         R$ {preco.toFixed(2)}
                       </span>
-                      <span className="text-emerald-400 font-bold text-lg drop-shadow-lg">
+                      <span className="text-emerald-400 font-bold text-sm sm:text-lg drop-shadow-lg">
                         R$ {precoEmMassa.toFixed(2)}
                       </span>
                     </div>
@@ -96,18 +96,18 @@ export default function CardProduto({ produto }) {
                 }
                 if (temPromo) {
                   return (
-                    <div className="flex items-center gap-2">
-                      <span className="text-white/50 line-through text-sm drop-shadow-lg">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-white/50 line-through text-[10px] sm:text-sm drop-shadow-lg">
                         R$ {preco.toFixed(2)}
                       </span>
-                      <span className="text-emerald-400 font-bold text-lg drop-shadow-lg">
+                      <span className="text-emerald-400 font-bold text-sm sm:text-lg drop-shadow-lg">
                         R$ {precoPromo.toFixed(2)}
                       </span>
                     </div>
                   )
                 }
                 return (
-                  <span className="text-white font-bold text-lg drop-shadow-lg">
+                  <span className="text-white font-bold text-sm sm:text-lg drop-shadow-lg">
                     R$ {preco.toFixed(2)}
                   </span>
                 )
@@ -117,7 +117,7 @@ export default function CardProduto({ produto }) {
         </Link>
 
         {/* Conteúdo */}
-        <div className="p-4">
+        <div className="p-2.5 sm:p-4">
           {/* Marca */}
           <p className="text-gold/60 text-[10px] uppercase tracking-widest font-medium mb-1.5">
             {produto.marcas?.nome}
