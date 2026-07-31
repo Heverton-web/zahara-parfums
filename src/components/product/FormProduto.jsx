@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { X, Check, Image as ImageIcon, Link2, Loader2, Sparkles, Search, ArrowLeft, ChevronRight } from 'lucide-react'
-import { createProduto, updateProduto } from '../../hooks/useProdutos'
+import { X, Check, Image as ImageIcon, Link2, Loader2, Sparkles, Search, ArrowLeft, ChevronRight, Plus } from 'lucide-react'
+import { createProduto, updateProduto, createMarca } from '../../hooks/useProdutos'
 import { searchBrands, listPerfumesByBrand, scrapeFragrantica, isFragranticaUrl, matchMarca, openFragranticaSearch, parseFragranticaUrl, validateFragranticaUrl } from '../../lib/fragrantica'
 
 const generos = [
@@ -69,7 +69,7 @@ function ShimmerSpinner({ message = 'Extraindo dados do perfume...' }) {
 
 const FRAG_STEPS = { BRAND: 'brand', PERFUMES: 'perfumes' }
 
-function FragranticaSearch({ marcas, onAutoFill }) {
+function FragranticaSearch({ marcas, onAutoFill, onBrandSaved }) {
   const [step, setStep] = useState(FRAG_STEPS.BRAND)
   const [brandQuery, setBrandQuery] = useState('')
   const [brandResults, setBrandResults] = useState([])
@@ -78,6 +78,8 @@ function FragranticaSearch({ marcas, onAutoFill }) {
   const [perfumeFilter, setPerfumeFilter] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [savingBrand, setSavingBrand] = useState(false)
+  const [savedBrandMsg, setSavedBrandMsg] = useState('')
 
   async function handleSearchBrand() {
     if (!brandQuery.trim() || brandQuery.trim().length < 2) return
@@ -88,7 +90,7 @@ function FragranticaSearch({ marcas, onAutoFill }) {
     try {
       const results = await searchBrands(brandQuery)
       if (!results || results.length === 0) {
-        setError('Nenhuma marca encontrada. Tente outro nome.')
+        setError('Nenhuma marca encontrada no Fragrantica. Tente outro nome.')
       } else {
         setBrandResults(results)
       }
@@ -144,7 +146,6 @@ function FragranticaSearch({ marcas, onAutoFill }) {
         })
       }
     } catch {
-      // Fallback: preencher com dados disponíveis sem scraping
       onAutoFill({
         nome: perfume.name,
         brand: selectedBrand?.name || '',
@@ -158,6 +159,21 @@ function FragranticaSearch({ marcas, onAutoFill }) {
     }
   }
 
+  async function handleSaveBrand(brandName) {
+    setSavingBrand(true)
+    setSavedBrandMsg('')
+    try {
+      const newMarca = await createMarca(brandName)
+      setSavedBrandMsg(`Marca "${brandName}" salva!`)
+      if (onBrandSaved) onBrandSaved(newMarca)
+      setTimeout(() => setSavedBrandMsg(''), 3000)
+    } catch {
+      setError('Erro ao salvar marca. Tente novamente.')
+    } finally {
+      setSavingBrand(false)
+    }
+  }
+
   function resetState() {
     setStep(FRAG_STEPS.BRAND)
     setBrandQuery('')
@@ -166,6 +182,7 @@ function FragranticaSearch({ marcas, onAutoFill }) {
     setPerfumes([])
     setPerfumeFilter('')
     setError('')
+    setSavedBrandMsg('')
   }
 
   function handleBack() {
@@ -181,6 +198,11 @@ function FragranticaSearch({ marcas, onAutoFill }) {
   const filteredPerfumes = perfumeFilter.trim()
     ? perfumes.filter(p => p.name.toLowerCase().includes(perfumeFilter.toLowerCase()))
     : perfumes
+
+  // Verificar se a marca selecionada já existe localmente
+  const selectedBrandExistsLocally = selectedBrand
+    ? marcas.some(m => m.nome.toLowerCase() === selectedBrand.name.toLowerCase())
+    : false
 
   const genderIcon = (g) => {
     if (g === 'masculino') return '♂'
@@ -209,13 +231,41 @@ function FragranticaSearch({ marcas, onAutoFill }) {
       {/* Step 1: Search brand */}
       {step === FRAG_STEPS.BRAND && (
         <>
+          {/* Marcas locais — select */}
+          {marcas.length > 0 && (
+            <div className="mb-3">
+              <label className="block text-[10px] text-ivory/30 uppercase tracking-wider mb-1.5">Marcas cadastradas</label>
+              <select
+                value=""
+                onChange={(e) => {
+                  if (!e.target.value) return
+                  const marca = marcas.find(m => m.id === e.target.value)
+                  if (marca) handleSelectBrand({ name: marca.nome, slug: marca.nome.replace(/\s+/g, '-'), url: '', image: '', local: true })
+                }}
+                className={`${inputClass} text-xs cursor-pointer`}
+              >
+                <option value="">Selecione uma marca...</option>
+                {marcas.map(marca => (
+                  <option key={marca.id} value={marca.id}>{marca.nome}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 my-2">
+            <div className="flex-1 h-px bg-ivory/5" />
+            <span className="text-[10px] text-ivory/20">ou buscar nova marca</span>
+            <div className="flex-1 h-px bg-ivory/5" />
+          </div>
+
+          {/* Busca no Fragrantica */}
           <div className="flex gap-2">
             <input
               type="text"
               value={brandQuery}
               onChange={(e) => setBrandQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleSearchBrand())}
-              placeholder="Nome da marca (ex: Dior, creed, Lattafa)"
+              placeholder="Nome da marca no Fragrantica..."
               className={`${inputClass} flex-1 text-xs`}
               disabled={loading}
             />
@@ -226,36 +276,60 @@ function FragranticaSearch({ marcas, onAutoFill }) {
               className="px-3 py-2 rounded-lg bg-gold/10 text-gold border border-gold/20 hover:bg-gold/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
             >
               {loading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
-              <span className="text-xs">Buscar</span>
+              <span className="text-xs">Fragrantica</span>
             </button>
           </div>
 
           {loading && <ShimmerSpinner message="Buscando marcas..." />}
 
+          {/* Resultados do Fragrantica */}
           {brandResults.length > 0 && !loading && (
             <div className="mt-3 space-y-1.5">
-              <p className="text-[10px] text-ivory/30 uppercase tracking-wider">Selecione a marca:</p>
-              {brandResults.map((brand, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleSelectBrand(brand)}
-                  className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-noir-800/50 border border-ivory/5 hover:border-gold/20 hover:bg-gold/5 transition-all text-left group"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-noir-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                    {brand.image ? (
-                      <img src={brand.image} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-ivory/20 text-xs font-bold">{brand.name[0]}</span>
+              <p className="text-[10px] text-ivory/30 uppercase tracking-wider">Resultados do Fragrantica:</p>
+              {brandResults.map((brand, idx) => {
+                const existsLocally = marcas.some(m => m.nome.toLowerCase() === brand.name.toLowerCase())
+                return (
+                  <div key={idx} className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectBrand(brand)}
+                      className="flex-1 flex items-center gap-3 p-2.5 rounded-lg bg-noir-800/50 border border-ivory/5 hover:border-gold/20 hover:bg-gold/5 transition-all text-left group"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-noir-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {brand.image ? (
+                          <img src={brand.image} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-ivory/20 text-xs font-bold">{brand.name[0]}</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-ivory/80 text-sm font-medium truncate">{brand.name}</p>
+                        {existsLocally && (
+                          <p className="text-[10px] text-gold/40">já cadastrada</p>
+                        )}
+                      </div>
+                      <ChevronRight size={14} className="text-ivory/20 group-hover:text-gold/50 transition-colors flex-shrink-0" />
+                    </button>
+                    {!existsLocally && (
+                      <button
+                        type="button"
+                        onClick={() => handleSaveBrand(brand.name)}
+                        disabled={savingBrand}
+                        className="px-2.5 py-2.5 rounded-lg bg-gold/10 text-gold border border-gold/20 hover:bg-gold/20 transition-all disabled:opacity-40 flex items-center gap-1 flex-shrink-0"
+                        title="Salvar marca na minha lista"
+                      >
+                        {savingBrand ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+                        <span className="text-[10px]">Salvar</span>
+                      </button>
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-ivory/80 text-sm font-medium truncate">{brand.name}</p>
-                  </div>
-                  <ChevronRight size={14} className="text-ivory/20 group-hover:text-gold/50 transition-colors flex-shrink-0" />
-                </button>
-              ))}
+                )
+              })}
             </div>
+          )}
+
+          {savedBrandMsg && (
+            <p className="mt-2 text-xs text-green-400">{savedBrandMsg}</p>
           )}
         </>
       )}
@@ -298,6 +372,25 @@ function FragranticaSearch({ marcas, onAutoFill }) {
               ))}
             </div>
           )}
+
+          {/* Salvar marca se não existe localmente */}
+          {!selectedBrandExistsLocally && selectedBrand && (
+            <div className="mt-3 pt-2 border-t border-ivory/5 flex items-center gap-2">
+              <span className="text-[10px] text-ivory/30">Marca "{selectedBrand.name}" não está cadastrada.</span>
+              <button
+                type="button"
+                onClick={() => handleSaveBrand(selectedBrand.name)}
+                disabled={savingBrand}
+                className="text-[11px] text-gold/60 hover:text-gold transition-colors underline underline-offset-2 flex items-center gap-1"
+              >
+                {savingBrand ? <Loader2 size={10} className="animate-spin" /> : <Plus size={10} />}
+                salvar na lista
+              </button>
+            </div>
+          )}
+          {savedBrandMsg && (
+            <p className="mt-2 text-xs text-green-400">{savedBrandMsg}</p>
+          )}
         </>
       )}
 
@@ -322,7 +415,7 @@ function FragranticaSearch({ marcas, onAutoFill }) {
 
 // ─── Main Form ───────────────────────────────────────────────
 
-export default function FormProduto({ produto, marcas = [], onSuccess, onCancel }) {
+export default function FormProduto({ produto, marcas = [], onMarcaCriada, onSuccess, onCancel }) {
   const [form, setForm] = useState({
     nome: '',
     marca_id: '',
@@ -461,7 +554,7 @@ export default function FormProduto({ produto, marcas = [], onSuccess, onCancel 
 
       {/* Fragrantica helper - only for new products */}
       {!isEditing && (
-        <FragranticaSearch marcas={marcas} onAutoFill={handleAutoFill} />
+        <FragranticaSearch marcas={marcas} onAutoFill={handleAutoFill} onBrandSaved={onMarcaCriada} />
       )}
 
       {/* URL paste for quick fill (both modes) */}

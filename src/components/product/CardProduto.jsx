@@ -36,13 +36,13 @@ export default function CardProduto({ produto }) {
       >
         {/* Image container */}
         <Link to={`/produto/${produto.id}`} className="block">
-          <div className="aspect-square bg-noir-800 relative overflow-hidden">
+          <div className="bg-noir-800 relative overflow-hidden" style={{ minHeight: '280px' }}>
             {produto.imagem_url && !imageError ? (
               <img
                 src={produto.imagem_url}
                 alt={produto.nome}
                 onError={() => setImageError(true)}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-noir-800 to-noir-900">
@@ -56,9 +56,9 @@ export default function CardProduto({ produto }) {
             
             {/* Tags */}
             {produto.tags?.length > 0 && (
-              <div className="absolute top-3 left-3 flex gap-1.5">
+              <div className="absolute top-3 left-3 flex gap-1.5 z-10">
                 {produto.tags.slice(0, 2).map((tag) => (
-                  <Badge key={tag} variant={tagColors[tag] || 'default'} className="text-[10px] px-2 py-0.5">
+                  <Badge key={tag} variant={tagColors[tag] || 'default'} className="px-2.5 py-1 backdrop-blur-sm">
                     {tag}
                   </Badge>
                 ))}

@@ -20,6 +20,7 @@ export default function Produto() {
   const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
+    window.scrollTo(0, 0)
     loadProduto()
   }, [id])
 
@@ -86,12 +87,12 @@ export default function Produto() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-12">
           {/* Image section */}
           <div className="relative">
-            <div className="aspect-square rounded-xl sm:rounded-2xl overflow-hidden luxury-card">
+            <div className="rounded-xl sm:rounded-2xl overflow-hidden luxury-card" style={{ minHeight: '300px', background: '#1a1a1a' }}>
               {produto.imagem_url ? (
                 <img
                   src={produto.imagem_url}
                   alt={produto.nome}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-noir-900">

@@ -1,19 +1,14 @@
 import { useState, useEffect } from 'react'
-import { useProdutos } from '../hooks/useProdutos'
+import { useProdutos, useMarcas } from '../hooks/useProdutos'
 import { Gem, SlidersHorizontal, X } from 'lucide-react'
 import Filtros from '../components/product/Filtros'
 import ListaProdutos from '../components/product/ListaProdutos'
-import { marcasMock } from '../data/mock'
 
 export default function Loja() {
   const [filtros, setFiltros] = useState({ genero: '', marca: '', tag: '' })
-  const [marcas, setMarcas] = useState([])
   const [showFilters, setShowFilters] = useState(false)
   const { produtos, loading } = useProdutos({ ...filtros, ativo: true })
-
-  useEffect(() => {
-    setMarcas(marcasMock)
-  }, [])
+  const { marcas } = useMarcas({ comProdutos: true })
 
   function handleFiltroChange(campo, valor) {
     setFiltros((prev) => ({ ...prev, [campo]: valor }))

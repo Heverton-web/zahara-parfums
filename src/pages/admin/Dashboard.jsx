@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import Card from '../../components/ui/Card'
 import { Package, Eye, MousePointerClick, TrendingUp } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -13,7 +13,6 @@ export default function Dashboard() {
   })
   const [viewsChart, setViewsChart] = useState([])
   const [topProdutos, setTopProdutos] = useState([])
-  const [dispositivos, setDispositivos] = useState([])
 
   useEffect(() => {
     fetchStats()
@@ -24,14 +23,28 @@ export default function Dashboard() {
       const hoje = new Date()
       hoje.setHours(0, 0, 0, 0)
 
-      const [produtos, views, cliques, chartData, top, devices] = await Promise.all([
-        supabase.from('produtos').select('id, ativo').catch(() => ({ data: null })),
-        supabase.from('tracking').select('*').eq('tipo', 'view').gte('criado_em', hoje.toISOString()).catch(() => ({ data: null })),
-        supabase.from('tracking').select('*').eq('tipo', 'click').gte('criado_em', hoje.toISOString()).catch(() => ({ data: null })),
-        supabase.from('tracking').select('tipo, criado_em').gte('criado_em', new Date(Date.now() - 7 * 86400000).toISOString()).catch(() => ({ data: null })),
-        supabase.from('tracking').select('produto_id, produtos(nome)').eq('tipo', 'view').gte('criado_em', new Date(Date.now() - 7 * 86400000).toISOString()).catch(() => ({ data: null })),
-        supabase.from('tracking').select('dispositivo').gte('criado_em', new Date(Date.now() - 30 * 86400000).toISOString()).catch(() => ({ data: null })),
+      const [produtos, views, cliques, chartData, top] = await Promise.all([
+        supabase.from('produtos').select('id, ativo'),
+        supabase.from('cliques').select('*').eq('tipo', 'view').gte('created_at', hoje.toISOString()),
+        supabase.from('cliques').select('*').eq('tipo', 'click').gte('created_at', hoje.toISOString()),
+        supabase.from('cliques').select('tipo, created_at').gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString()),
+        supabase.from('cliques').select('produto_id, produtos(nome)').eq('tipo', 'view').gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString()),
       ])
+
+      // Log erros para debug
+      if (produtos.error) console.warn('Dashboard produtos error:', produtos.error.message)
+      if (views.error) console.warn('Dashboard views error:', views.error.message)
+      if (cliques.error) console.warn('Dashboard cliques error:', cliques.error.message)
+
+      // Se produtos falhar, usar mock como fallback
+      if (produtos.error && !produtos.data) {
+        const { produtosMock } = await import('../../data/mock')
+        setStats(prev => ({
+          ...prev,
+          totalProdutos: produtosMock.length,
+          produtosAtivos: produtosMock.filter(p => p.ativo).length,
+        }))
+      }
 
       setStats(prev => ({
         ...prev,
@@ -50,7 +63,7 @@ export default function Dashboard() {
           days[key] = { dia: key, views: 0, cliques: 0 }
         }
         chartData.data.forEach(item => {
-          const key = item.criado_em.split('T')[0]
+          const key = item.created_at.split('T')[0]
           if (days[key]) {
             days[key][item.tipo === 'view' ? 'views' : 'cliques']++
           }
@@ -70,20 +83,6 @@ export default function Dashboard() {
           .slice(0, 5)
           .map(([name, value]) => ({ name, value }))
         setTopProdutos(sorted)
-      }
-
-      // Dispositivos
-      if (devices?.data) {
-        const devs = {}
-        devices.data.forEach(item => {
-          devs[item.dispositivo] = (devs[item.dispositivo] || 0) + 1
-        })
-        const colors = ['#C9A84C', '#7a1c42', '#065f46', '#A0A0A0']
-        setDispositivos(
-          Object.entries(devs).map(([name, value], i) => ({
-            name, value, color: colors[i % colors.length]
-          }))
-        )
       }
     } catch (err) {
       console.warn('Dashboard fetch error:', err)
@@ -196,46 +195,6 @@ export default function Dashboard() {
             </ResponsiveContainer>
           ) : (
             <div className="flex items-center justify-center h-[200px]">
-              <p className="text-ivory/25 sm:text-ivory/30 italic text-sm">Sem dados ainda</p>
-            </div>
-          )}
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <h2 className="font-heading text-base sm:text-lg font-bold text-ivory mb-3 sm:mb-4">
-            Dispositivos
-          </h2>
-          <p className="text-ivory/30 sm:text-ivory/40 text-[10px] sm:text-xs mb-3 sm:mb-4">Últimos 30 dias</p>
-          {dispositivos.length > 0 ? (
-            <div className="flex items-center justify-center">
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={dispositivos}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    labelLine={false}
-                  >
-                    {dispositivos.map((entry, index) => (
-                      <Cell key={index} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      background: '#1a1a1a',
-                      border: '1px solid rgba(201, 168, 76, 0.2)',
-                      borderRadius: '8px',
-                      fontSize: '12px',
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-[250px]">
               <p className="text-ivory/25 sm:text-ivory/30 italic text-sm">Sem dados ainda</p>
             </div>
           )}

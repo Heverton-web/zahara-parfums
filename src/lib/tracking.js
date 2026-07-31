@@ -40,24 +40,11 @@ export function generateFingerprint() {
   return components.join('|')
 }
 
-export async function registerEvent(produtoId, tipo, ip) {
+export async function registerEvent(produtoId, tipo) {
   try {
-    const ua = navigator.userAgent
-    const parsed = parseUserAgent(ua)
-    const fingerprint = generateFingerprint()
-    const pais = await getCountry(ip)
-
-    const { error } = await supabase.from('tracking').insert({
+    const { error } = await supabase.from('cliques').insert({
       produto_id: produtoId,
       tipo,
-      ip,
-      user_agent: ua,
-      dispositivo: parsed.dispositivo,
-      navegador: parsed.navegador,
-      so: parsed.so,
-      pais,
-      fingerprint,
-      referrer: document.referrer || null,
     })
     if (error) console.warn('Tracking insert error:', error)
   } catch (err) {

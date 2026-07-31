@@ -385,6 +385,7 @@ export default function AdminProdutos() {
         <FormProduto
           produto={produtoEditando}
           marcas={marcas}
+          onMarcaCriada={(nova) => setMarcas(prev => [...prev, nova].sort((a, b) => a.nome.localeCompare(b.nome)))}
           onSuccess={handleSuccess}
           onCancel={() => { setModalOpen(false); setProdutoEditando(null) }}
         />

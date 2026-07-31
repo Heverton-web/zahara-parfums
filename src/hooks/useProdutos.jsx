@@ -135,7 +135,21 @@ export async function toggleProdutoAtivo(id, currentAtivo) {
   return data
 }
 
-export function useMarcas() {
+export async function createMarca(nome) {
+  const { data, error } = await supabase
+    .from('marcas')
+    .insert({ nome })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Erro ao criar marca:', error)
+    throw error
+  }
+  return data
+}
+
+export function useMarcas({ comProdutos = false } = {}) {
   const [marcas, setMarcas] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -149,7 +163,7 @@ export function useMarcas() {
     setError(null)
 
     try {
-      const { data, error: fetchError } = await supabase
+      const { data: marcasData, error: fetchError } = await supabase
         .from('marcas')
         .select('*')
         .order('nome')
@@ -157,9 +171,26 @@ export function useMarcas() {
       if (fetchError) {
         console.warn('Supabase indisponível, usando dados mock')
         setMarcas(marcasMock)
-      } else {
-        setMarcas(data || [])
+        setLoading(false)
+        return
       }
+
+      let result = marcasData || []
+
+      // Filtrar marcas que possuem ao menos 1 produto ativo
+      if (comProdutos && result.length > 0) {
+        const { data: produtosData } = await supabase
+          .from('produtos')
+          .select('marca_id')
+          .eq('ativo', true)
+
+        const marcaIdsComProdutos = new Set(
+          (produtosData || []).map(p => p.marca_id).filter(Boolean)
+        )
+        result = result.filter(m => marcaIdsComProdutos.has(m.id))
+      }
+
+      setMarcas(result)
     } catch {
       console.warn('Supabase indisponível, usando dados mock')
       setMarcas(marcasMock)

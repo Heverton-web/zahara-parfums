@@ -87,7 +87,7 @@ export default function MarcasAdmin() {
           const { error } = await supabase.from('marcas').update({ nome }).eq('id', marcaEditando.id)
           if (error) throw error
         } else {
-          const { error } = await supabase.from('marcas').insert({ nome })
+          const { error } = await supabase.from('marcas').insert({ id: crypto.randomUUID(), nome })
           if (error) throw error
         }
       } else {
