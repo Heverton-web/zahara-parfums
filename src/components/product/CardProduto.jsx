@@ -80,7 +80,7 @@ export default function CardProduto({ produto }) {
         {/* Conteúdo */}
         <div className="p-2.5 sm:p-4">
           {/* Preço */}
-          <div className="mb-3">
+          <div className="mb-4">
             {(() => {
               const preco = Number(produto.preco_original) || 0
               const precoPromo = Number(produto.preco_promocional) || preco
