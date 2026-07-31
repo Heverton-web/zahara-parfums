@@ -90,22 +90,22 @@ export default function CardProduto({ produto }) {
 
               if (emMassa && precoEmMassa) {
                 return (
-                  <div className="flex items-center gap-2">
-                    <span className="text-ivory/30 line-through text-xs">R$ {preco.toFixed(2)}</span>
+                  <div className="flex items-center gap-1.5 whitespace-nowrap">
+                    <span className="text-ivory/30 line-through text-[11px]">R$ {preco.toFixed(2)}</span>
                     <span className="text-gold font-bold text-sm sm:text-base">R$ {precoEmMassa.toFixed(2)}</span>
                   </div>
                 )
               }
               if (temPromo) {
                 return (
-                  <div className="flex items-center gap-2">
-                    <span className="text-ivory/30 line-through text-xs">R$ {preco.toFixed(2)}</span>
+                  <div className="flex items-center gap-1.5 whitespace-nowrap">
+                    <span className="text-ivory/30 line-through text-[11px]">R$ {preco.toFixed(2)}</span>
                     <span className="text-gold font-bold text-sm sm:text-base">R$ {precoPromo.toFixed(2)}</span>
                   </div>
                 )
               }
               return (
-                <span className="text-gold font-bold text-sm sm:text-base">R$ {preco.toFixed(2)}</span>
+                <span className="text-gold font-bold text-sm sm:text-base whitespace-nowrap">R$ {preco.toFixed(2)}</span>
               )
             })()}
           </div>
