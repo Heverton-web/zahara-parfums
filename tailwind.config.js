@@ -105,6 +105,7 @@ export default {
         'fade-in': 'fadeIn 0.6s ease-out forwards',
         'slide-up': 'slideUp 0.6s ease-out forwards',
         'scale-in': 'scaleIn 0.4s ease-out forwards',
+        'scroll-wheel': 'scrollWheel 1.8s ease-in-out infinite',
       },
       keyframes: {
         float: {
@@ -130,6 +131,10 @@ export default {
         scaleIn: {
           '0%': { opacity: '0', transform: 'scale(0.9)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        scrollWheel: {
+          '0%': { opacity: '1', transform: 'translateY(0px)' },
+          '100%': { opacity: '0', transform: 'translateY(8px)' },
         },
       },
       spacing: {

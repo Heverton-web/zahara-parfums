@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <div className="relative">
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] sm:min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Background escuro sólido */}
         <div className="absolute inset-0 bg-noir-950" />
         
@@ -24,39 +24,43 @@ export default function Home() {
         {/* Content */}
         <div className="relative z-10 text-center px-4 sm:px-6 max-w-4xl mx-auto">
           {/* Decoração superior */}
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <div className="w-12 h-px bg-gradient-to-r from-transparent to-gold/40" />
-            <span className="text-gold/60 text-sm">✦</span>
-            <div className="w-12 h-px bg-gradient-to-l from-transparent to-gold/40" />
+          <div className="flex items-center justify-center gap-4 mb-10">
+            <div className="w-16 h-px bg-gradient-to-r from-transparent to-gold/50" />
+            <span className="text-gold/70 text-lg">✦</span>
+            <div className="w-16 h-px bg-gradient-to-l from-transparent to-gold/50" />
           </div>
 
-          {/* Subtítulo */}
-          <p className="text-gold/50 text-xs uppercase tracking-[0.3em] mb-6 font-medium">
-            Coleção Exclusiva
+          {/* Marca */}
+          <p className="font-accent text-gold/60 text-[11px] uppercase tracking-[0.4em] mb-8">
+            Zahara Parfums
           </p>
 
           {/* Título principal */}
-          <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold mb-6 leading-[0.95]">
-            <span className="text-ivory block">Zahara</span>
-            <span className="text-gradient-gold block">Parfums</span>
+          <h1 className="font-heading text-6xl sm:text-8xl md:text-9xl font-bold mb-8 leading-[0.9]">
+            <span className="text-ivory block mb-2">A Essência</span>
+            <span className="text-gradient-gold block">Do Oriente</span>
           </h1>
 
+          {/* Linha decorativa */}
+          <div className="w-24 h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent mx-auto mb-8" />
+
           {/* Descrição */}
-          <p className="text-ivory/50 text-base sm:text-lg max-w-lg mx-auto mb-10 leading-relaxed">
-            Perfumes árabes importados que despertam suas emoções e transportam você a um mundo de sofisticação
+          <p className="font-display text-ivory/50 text-lg sm:text-xl max-w-xl mx-auto mb-12 italic leading-relaxed">
+            Fragrâncias árabes de luxo importadas direto do Oriente Médio.
+            Cada gota carrega séculos de tradição em perfumaria.
           </p>
 
           {/* Botões */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link 
               to="/loja" 
-              className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-gold to-gold-light text-noir-950 font-semibold rounded-xl hover:shadow-lg hover:shadow-gold/25 transition-all duration-300 text-center"
+              className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-gold via-gold-light to-gold text-noir-950 font-bold rounded-xl hover:shadow-xl hover:shadow-gold/30 transition-all duration-500 text-sm uppercase tracking-wider"
             >
               Explorar Coleção
             </Link>
             <Link
               to="/marcas"
-              className="w-full sm:w-auto px-8 py-3.5 border border-gold/30 text-gold rounded-xl hover:bg-gold/10 transition-all duration-300 text-center"
+              className="w-full sm:w-auto px-10 py-4 border border-gold/40 text-gold rounded-xl hover:bg-gold/10 transition-all duration-500 text-sm uppercase tracking-wider"
             >
               Nossas Marcas
             </Link>
@@ -64,17 +68,16 @@ export default function Home() {
 
           {/* Decoração inferior */}
           <div className="flex items-center justify-center gap-4 mt-16">
-            <div className="w-16 h-px bg-gradient-to-r from-transparent to-gold/20" />
+            <div className="w-20 h-px bg-gradient-to-r from-transparent to-gold/20" />
             <span className="text-gold/30 text-xs">◆</span>
-            <div className="w-16 h-px bg-gradient-to-l from-transparent to-gold/20" />
+            <div className="w-20 h-px bg-gradient-to-l from-transparent to-gold/20" />
           </div>
         </div>
 
-        {/* Scroll indicator */}
+        {/* Scroll indicator - mouse */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden sm:flex flex-col items-center gap-2">
-          <span className="text-ivory/30 text-[10px] uppercase tracking-widest">Scroll</span>
-          <div className="w-5 h-8 rounded-full border border-ivory/20 flex items-start justify-center p-1.5">
-            <div className="w-1 h-2 bg-gold/40 rounded-full animate-bounce" />
+          <div className="w-6 h-10 rounded-full border border-ivory/20 flex items-start justify-center p-1.5">
+            <div className="w-1 h-2.5 bg-gold/50 rounded-full animate-scroll-wheel" />
           </div>
         </div>
       </section>
