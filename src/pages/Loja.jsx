@@ -19,7 +19,7 @@ export default function Loja() {
   const activeFiltersCount = Object.values(filtros).filter(v => v).length
 
   return (
-    <div className="min-h-screen bg-noir-950">
+    <div className="min-h-screen bg-noir-950 pt-16 sm:pt-20">
       {/* Super Promoções */}
       <SuperPromocoes />
 
