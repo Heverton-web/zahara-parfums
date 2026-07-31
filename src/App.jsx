@@ -13,6 +13,7 @@ import Dashboard from './pages/admin/Dashboard'
 import AdminProdutos from './pages/admin/Produtos'
 import MarcasAdmin from './pages/admin/MarcasAdmin'
 import PromocoesEmMassa from './pages/admin/PromocoesEmMassa'
+import Configuracoes from './pages/admin/Configuracoes'
 import AdminLayout from './components/layout/AdminLayout'
 
 function ScrollToTop() {
@@ -52,6 +53,7 @@ function App() {
             <Route path="produtos" element={<AdminProdutos />} />
             <Route path="marcas" element={<MarcasAdmin />} />
             <Route path="promocoes" element={<PromocoesEmMassa />} />
+            <Route path="configuracoes" element={<Configuracoes />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
