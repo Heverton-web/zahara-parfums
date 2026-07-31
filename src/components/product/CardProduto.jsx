@@ -23,8 +23,8 @@ export default function CardProduto({ produto }) {
     setShowModal(true)
   }
 
-  function handleConfirmWhatsApp(nomeUsuario) {
-    const link = buildWhatsAppLink(produto, nomeUsuario)
+  async function handleConfirmWhatsApp(nomeUsuario) {
+    const link = await buildWhatsAppLink(produto, nomeUsuario)
     window.open(link, '_blank')
   }
 

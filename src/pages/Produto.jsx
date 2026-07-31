@@ -44,8 +44,8 @@ export default function Produto() {
     setLoading(false)
   }
 
-  function handleConfirmWhatsApp(nomeUsuario) {
-    const link = buildWhatsAppLink(produto, nomeUsuario)
+  async function handleConfirmWhatsApp(nomeUsuario) {
+    const link = await buildWhatsAppLink(produto, nomeUsuario)
     window.open(link, '_blank')
   }
 
