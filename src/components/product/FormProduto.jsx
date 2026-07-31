@@ -434,7 +434,6 @@ export default function FormProduto({ produto, marcas = [], onMarcaCriada, onSuc
   // URL scraping state
   const [genericUrl, setGenericUrl] = useState('')
   const [scrapingUrl, setScrapingUrl] = useState(false)
-  const [fragUrl, setFragUrl] = useState('')
 
   useEffect(() => {
     if (produto) {
@@ -495,23 +494,6 @@ export default function FormProduto({ produto, marcas = [], onMarcaCriada, onSuc
     }
   }
 
-  // Auto-fill when Fragrantica URL is pasted
-  function handleFragranticaUrlPaste(e) {
-    const url = e.target.value
-    setFragUrl(url)
-    if (!validateFragranticaUrl(url)) return
-    const parsed = parseFragranticaUrl(url)
-    if (!parsed) return
-    setForm(prev => ({
-      ...prev,
-      nome: parsed.name || prev.nome,
-    }))
-    if (parsed.brand && marcas.length > 0) {
-      const matched = matchMarca(parsed.brand, marcas)
-      if (matched) setForm(prev => ({ ...prev, marca_id: matched.id }))
-    }
-  }
-
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
@@ -555,14 +537,11 @@ export default function FormProduto({ produto, marcas = [], onMarcaCriada, onSuc
         <div className="w-8 h-px bg-gradient-to-r from-gold/50 to-transparent mt-2" />
       </div>
 
-      {/* Fragrantica helper - only for new products */}
-      {!isEditing && (
-        <FragranticaSearch marcas={marcas} onAutoFill={handleAutoFill} onBrandSaved={onMarcaCriada} />
-      )}
+      {/* Fragrantica helper */}
+      <FragranticaSearch marcas={marcas} onAutoFill={handleAutoFill} onBrandSaved={onMarcaCriada} />
 
       {/* URL scraping - qualquer site */}
-      {!isEditing && (
-        <div className="mb-4 p-3 rounded-xl bg-noir-800/30 border border-ivory/5">
+      <div className="mb-4 p-3 rounded-xl bg-noir-800/30 border border-ivory/5">
           <div className="flex items-center gap-2 mb-2">
             <Link2 size={13} className="text-gold/70" />
             <span className="text-[11px] font-medium text-ivory/50">
@@ -613,22 +592,6 @@ export default function FormProduto({ produto, marcas = [], onMarcaCriada, onSuc
           </div>
           {scrapingUrl && <ShimmerSpinner message="Extraindo dados da URL..." />}
         </div>
-      )}
-
-      {/* Fragrantica URL paste (modo edição) */}
-      {isEditing && (
-        <div className="mb-4">
-          <InputField label="URL do Fragrantica (colar para auto-preenchimento)">
-            <input
-              type="url"
-              value={fragUrl}
-              onChange={handleFragranticaUrlPaste}
-              placeholder="https://www.fragrantica.com.br/perfume/..."
-              className={inputClass}
-            />
-          </InputField>
-        </div>
-      )}
 
       {error && (
         <div className="p-2.5 rounded-lg text-sm mb-3 bg-red-500/10 text-red-400 border border-red-500/20">
