@@ -80,7 +80,7 @@ export default function CardProduto({ produto }) {
         {/* Conteúdo */}
         <div className="p-2.5 sm:p-4">
           {/* Preço */}
-          <div className="mb-2">
+          <div className="mb-3">
             {(() => {
               const preco = Number(produto.preco_original) || 0
               const precoPromo = Number(produto.preco_promocional) || preco
@@ -121,13 +121,13 @@ export default function CardProduto({ produto }) {
           })()}
 
           {/* Marca */}
-          <p className="text-gold/60 text-[10px] uppercase tracking-widest font-medium mb-1.5">
+          <p className="text-gold/60 text-[10px] uppercase tracking-widest font-medium mb-0.5">
             {produto.marcas?.nome}
           </p>
           
           {/* Nome */}
           <Link to={`/produto/${produto.id}`}>
-            <h3 className="text-ivory font-semibold text-sm mb-3 group-hover:text-gold transition-colors duration-300 line-clamp-2 leading-snug min-h-[40px]">
+            <h3 className="text-ivory font-semibold text-sm mb-2 group-hover:text-gold transition-colors duration-300 line-clamp-2 leading-snug min-h-[40px]">
               {produto.nome}
             </h3>
           </Link>
