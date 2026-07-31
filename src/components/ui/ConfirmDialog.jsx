@@ -1,6 +1,17 @@
+import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { X, AlertTriangle } from 'lucide-react'
 
 export default function ConfirmDialog({ isOpen, onClose, onConfirm, title, message, confirmText = 'Confirmar', cancelText = 'Cancelar', variant = 'danger' }) {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [isOpen])
+
   if (!isOpen) return null
 
   const variants = {
@@ -16,12 +27,12 @@ export default function ConfirmDialog({ isOpen, onClose, onConfirm, title, messa
 
   const style = variants[variant] || variants.danger
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
+  return createPortal(
+    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
+      <div className="absolute inset-0 bg-black" onClick={onClose} />
       
       <div 
-        className="relative w-full max-w-sm rounded-2xl p-6 shadow-2xl z-10"
+        className="relative w-full max-w-sm rounded-2xl p-6 shadow-2xl"
         style={{ 
           backgroundColor: '#0a0a0f',
           border: '1px solid rgba(212, 175, 55, 0.15)'
@@ -68,6 +79,7 @@ export default function ConfirmDialog({ isOpen, onClose, onConfirm, title, messa
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

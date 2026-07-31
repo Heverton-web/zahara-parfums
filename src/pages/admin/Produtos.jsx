@@ -360,12 +360,7 @@ export default function AdminProdutos() {
         )}
       </div>
 
-      <Modal isOpen={modalOpen} onClose={() => { setModalOpen(false); setProdutoEditando(null) }}>
-        <div className="mb-4">
-          <h3 className="font-heading text-lg font-semibold text-ivory">
-            {produtoEditando ? 'Editar Produto' : 'Novo Produto'}
-          </h3>
-        </div>
+      <Modal isOpen={modalOpen} onClose={() => { setModalOpen(false); setProdutoEditando(null) }} size="lg">
         <FormProduto
           produto={produtoEditando}
           marcas={marcas}

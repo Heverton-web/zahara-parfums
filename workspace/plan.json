@@ -1,0 +1,127 @@
+{
+  "pass_number": 1,
+  "mode": "A",
+  "generated_at": "2026-07-30T00:00:00Z",
+  "investigations": [
+    {
+      "id": "INV-001",
+      "title": "RLS Policy Overly Permissive Authorization",
+      "question": "Do the RLS policies using auth.role() = 'authenticated' grant excessive privileges, allowing any authenticated user to perform admin operations?",
+      "target_files": [
+        "supabase/schema.sql",
+        "supabase/migration-fixed.sql",
+        "src/components/layout/AdminLayout.jsx",
+        "src/hooks/useAuth.jsx"
+      ],
+      "kb_references": [
+        "workspace/kb/entities/auth_module.md",
+        "workspace/kb/vulnerabilities/CWE-862.md"
+      ],
+      "priority": "CRITICAL",
+      "attack_surface": "TB2, TB3"
+    },
+    {
+      "id": "INV-002",
+      "title": "Hardcoded Admin Credentials in Source",
+      "question": "Are admin passwords committed to the repository in plaintext, enabling credential compromise?",
+      "target_files": [
+        "scripts/create-admins.mjs",
+        "scripts/create-admin.js"
+      ],
+      "kb_references": [
+        "workspace/kb/entities/admin_scripts.md",
+        "workspace/kb/vulnerabilities/CWE-798.md"
+      ],
+      "priority": "HIGH",
+      "attack_surface": "TB3"
+    },
+    {
+      "id": "INV-003",
+      "title": "SSRF in Fragrantica Edge Function",
+      "question": "Does the scrape-fragrantica Edge Function allow server-side request forgery via the URL parameter?",
+      "target_files": [
+        "supabase/functions/scrape-fragrantica/index.ts",
+        "src/lib/fragrantica.js"
+      ],
+      "kb_references": [
+        "workspace/kb/entities/fragrantica_scraper.md",
+        "workspace/kb/vulnerabilities/CWE-918.md"
+      ],
+      "priority": "MEDIUM",
+      "attack_surface": "TB4"
+    },
+    {
+      "id": "INV-004",
+      "title": "Missing Login Rate Limiting",
+      "question": "Is there any rate limiting or brute-force protection on the admin login endpoint?",
+      "target_files": [
+        "src/pages/admin/Login.jsx",
+        "src/hooks/useAuth.jsx"
+      ],
+      "kb_references": [
+        "workspace/kb/entities/auth_module.md",
+        "workspace/kb/vulnerabilities/CWE-307.md"
+      ],
+      "priority": "MEDIUM",
+      "attack_surface": "TB3"
+    },
+    {
+      "id": "INV-005",
+      "title": "Tracking PII Collection Without Consent",
+      "question": "Does the tracking system collect personally identifiable information (IP, fingerprint) without user consent, and transmit it over insecure connections?",
+      "target_files": [
+        "src/lib/tracking.js",
+        "src/hooks/useTracking.jsx"
+      ],
+      "kb_references": [
+        "workspace/kb/entities/tracking_system.md",
+        "workspace/kb/vulnerabilities/CWE-319.md"
+      ],
+      "priority": "LOW",
+      "attack_surface": "TB5"
+    },
+    {
+      "id": "INV-006",
+      "title": "Stored Content Injection via Product Data",
+      "question": "Can malicious content injected via product names, descriptions, or image URLs affect public visitors?",
+      "target_files": [
+        "src/components/product/CardProduto.jsx",
+        "src/pages/Produto.jsx",
+        "src/components/product/FormProduto.jsx"
+      ],
+      "kb_references": [
+        "workspace/kb/entities/product_catalog.md",
+        "workspace/kb/vulnerabilities/CWE-79.md"
+      ],
+      "priority": "LOW",
+      "attack_surface": "TB1"
+    },
+    {
+      "id": "INV-007",
+      "title": "Unrestricted Storage Uploads",
+      "question": "Are file uploads to the Supabase storage bucket properly restricted by type, size, and content?",
+      "target_files": [
+        "src/components/product/FormProduto.jsx"
+      ],
+      "kb_references": [
+        "workspace/kb/entities/storage_system.md"
+      ],
+      "priority": "MEDIUM",
+      "attack_surface": "TB2"
+    },
+    {
+      "id": "INV-008",
+      "title": "WhatsApp Message Injection",
+      "question": "Can user-controlled input in the WhatsApp modal inject content into the pre-filled message?",
+      "target_files": [
+        "src/lib/whatsapp.js",
+        "src/components/product/WhatsAppModal.jsx"
+      ],
+      "kb_references": [
+        "workspace/kb/entities/whatsapp_integration.md"
+      ],
+      "priority": "LOW",
+      "attack_surface": "TB6"
+    }
+  ]
+}

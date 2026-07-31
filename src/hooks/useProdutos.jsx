@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { produtosMock, marcasMock } from '../data/mock'
 
 export function useProdutos(filtros = {}) {
   const [produtos, setProdutos] = useState([])
@@ -32,21 +33,19 @@ export function useProdutos(filtros = {}) {
         query = query.contains('tags', [filtros.tag])
       }
 
-      query = query.order('created_at', { ascending: false })
+      query = query.order('nome', { ascending: true })
 
       const { data, error: fetchError } = await query
 
       if (fetchError) {
-        console.error('Erro ao buscar produtos:', fetchError)
-        setError(fetchError.message)
-        setProdutos([])
+        console.warn('Supabase indisponível, usando dados mock')
+        setProdutos(produtosMock)
       } else {
         setProdutos(data || [])
       }
-    } catch (err) {
-      console.error('Erro ao buscar produtos:', err)
-      setError(err.message)
-      setProdutos([])
+    } catch {
+      console.warn('Supabase indisponível, usando dados mock')
+      setProdutos(produtosMock)
     }
 
     setLoading(false)
@@ -145,16 +144,14 @@ export function useMarcas() {
         .order('nome')
 
       if (fetchError) {
-        console.error('Erro ao buscar marcas:', fetchError)
-        setError(fetchError.message)
-        setMarcas([])
+        console.warn('Supabase indisponível, usando dados mock')
+        setMarcas(marcasMock)
       } else {
         setMarcas(data || [])
       }
-    } catch (err) {
-      console.error('Erro ao buscar marcas:', err)
-      setError(err.message)
-      setMarcas([])
+    } catch {
+      console.warn('Supabase indisponível, usando dados mock')
+      setMarcas(marcasMock)
     }
 
     setLoading(false)

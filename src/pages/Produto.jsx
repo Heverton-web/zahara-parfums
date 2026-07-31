@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Gem, Shield, Truck, Gift } from 'lucide-react'
 import { fetchProdutoById } from '../hooks/useProdutos'
+import { produtosMock, marcasMock } from '../data/mock'
 import { buildWhatsAppLink } from '../lib/whatsapp'
 import WhatsAppModal from '../components/product/WhatsAppModal'
 import Badge from '../components/ui/Badge'
@@ -23,9 +24,19 @@ export default function Produto() {
   }, [id])
 
   async function loadProduto() {
-    const { data } = await fetchProdutoById(id)
-    if (data) {
-      setProduto(data)
+    try {
+      const data = await fetchProdutoById(id)
+      if (data) {
+        setProduto(data)
+      } else {
+        // Fallback para mock
+        const mock = produtosMock.find(p => p.id === id)
+        setProduto(mock || null)
+      }
+    } catch {
+      // Fallback para mock em caso de erro
+      const mock = produtosMock.find(p => p.id === id)
+      setProduto(mock || null)
     }
     setLoading(false)
   }
