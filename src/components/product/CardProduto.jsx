@@ -73,51 +73,53 @@ export default function CardProduto({ produto }) {
               ) : null
             })()}
             
-            {/* Preço sobreposto na imagem */}
-            <div className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-auto">
-              {(() => {
-                const preco = Number(produto.preco_original) || 0
-                const precoPromo = Number(produto.preco_promocional) || preco
-                const precoEmMassa = Number(produto.preco_em_massa)
-                const emMassa = produto.em_promocao_em_massa && produto.promocoes_em_massa?.data_fim && new Date(produto.promocoes_em_massa.data_fim) > new Date()
-                const temPromo = !emMassa && (produto.tags?.includes('promoção') || produto.tags?.includes('oferta relâmpago')) && precoPromo
 
-                if (emMassa && precoEmMassa) {
-                  return (
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-white/50 line-through text-[10px] sm:text-sm drop-shadow-lg">
-                        R$ {preco.toFixed(2)}
-                      </span>
-                      <span className="text-emerald-400 font-bold text-sm sm:text-lg drop-shadow-lg">
-                        R$ {precoEmMassa.toFixed(2)}
-                      </span>
-                    </div>
-                  )
-                }
-                if (temPromo) {
-                  return (
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-white/50 line-through text-[10px] sm:text-sm drop-shadow-lg">
-                        R$ {preco.toFixed(2)}
-                      </span>
-                      <span className="text-emerald-400 font-bold text-sm sm:text-lg drop-shadow-lg">
-                        R$ {precoPromo.toFixed(2)}
-                      </span>
-                    </div>
-                  )
-                }
-                return (
-                  <span className="text-white font-bold text-sm sm:text-lg drop-shadow-lg">
-                    R$ {preco.toFixed(2)}
-                  </span>
-                )
-              })()}
-            </div>
           </div>
         </Link>
 
         {/* Conteúdo */}
         <div className="p-2.5 sm:p-4">
+          {/* Preço */}
+          <div className="mb-2">
+            {(() => {
+              const preco = Number(produto.preco_original) || 0
+              const precoPromo = Number(produto.preco_promocional) || preco
+              const precoEmMassa = Number(produto.preco_em_massa)
+              const emMassa = produto.em_promocao_em_massa && produto.promocoes_em_massa?.data_fim && new Date(produto.promocoes_em_massa.data_fim) > new Date()
+              const temPromo = !emMassa && (produto.tags?.includes('promoção') || produto.tags?.includes('oferta relâmpago')) && precoPromo
+
+              if (emMassa && precoEmMassa) {
+                return (
+                  <div className="flex items-center gap-2">
+                    <span className="text-ivory/30 line-through text-xs">R$ {preco.toFixed(2)}</span>
+                    <span className="text-gold font-bold text-sm sm:text-base">R$ {precoEmMassa.toFixed(2)}</span>
+                  </div>
+                )
+              }
+              if (temPromo) {
+                return (
+                  <div className="flex items-center gap-2">
+                    <span className="text-ivory/30 line-through text-xs">R$ {preco.toFixed(2)}</span>
+                    <span className="text-gold font-bold text-sm sm:text-base">R$ {precoPromo.toFixed(2)}</span>
+                  </div>
+                )
+              }
+              return (
+                <span className="text-gold font-bold text-sm sm:text-base">R$ {preco.toFixed(2)}</span>
+              )
+            })()}
+          </div>
+
+          {/* Timer */}
+          {(() => {
+            const emMassa = produto.em_promocao_em_massa && produto.promocoes_em_massa?.data_fim && new Date(produto.promocoes_em_massa.data_fim) > new Date()
+            return emMassa ? (
+              <div className="mb-2">
+                <CountdownTimer dataFim={produto.promocoes_em_massa.data_fim} size="sm" fullWidth />
+              </div>
+            ) : null
+          })()}
+
           {/* Marca */}
           <p className="text-gold/60 text-[10px] uppercase tracking-widest font-medium mb-1.5">
             {produto.marcas?.nome}
@@ -129,16 +131,6 @@ export default function CardProduto({ produto }) {
               {produto.nome}
             </h3>
           </Link>
-
-          {/* Timer promoção em massa */}
-          {(() => {
-            const emMassa = produto.em_promocao_em_massa && produto.promocoes_em_massa?.data_fim && new Date(produto.promocoes_em_massa.data_fim) > new Date()
-            return emMassa ? (
-              <div className="mb-3 w-full">
-                <CountdownTimer dataFim={produto.promocoes_em_massa.data_fim} size="md" fullWidth />
-              </div>
-            ) : null
-          })()}
 
           {/* Botão WhatsApp */}
           <button
