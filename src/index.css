@@ -16,6 +16,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-restoration: none;
 }
 
 body {
@@ -343,6 +344,22 @@ body {
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+}
+
+/* Badge pulse animation */
+.badge-pulse {
+  animation: badgePulse 2.5s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.03);
+    filter: brightness(1.15);
+  }
 }
 
 /* Price tag */

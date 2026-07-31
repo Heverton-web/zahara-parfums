@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { AuthProvider } from './hooks/useAuth'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
@@ -14,6 +15,14 @@ import MarcasAdmin from './pages/admin/MarcasAdmin'
 import PromocoesEmMassa from './pages/admin/PromocoesEmMassa'
 import AdminLayout from './components/layout/AdminLayout'
 
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
+
 function PublicLayout({ children }) {
   return (
     <div className="flex flex-col min-h-screen">
@@ -27,6 +36,7 @@ function PublicLayout({ children }) {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <Routes>
           {/* Rotas públicas */}
