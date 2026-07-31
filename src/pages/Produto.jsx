@@ -220,7 +220,7 @@ export default function Produto() {
                 style={{ border: '0.25px solid rgba(212, 175, 55, 0.15)' }}
               >
                 <Truck className="text-gold/50 sm:text-gold/60 mx-auto mb-1.5 sm:mb-2" size={20} />
-                <p className="text-ivory/40 text-[10px] sm:text-xs font-medium leading-tight">Envio Todo Brasil</p>
+                <p className="text-ivory/40 text-[10px] sm:text-xs font-medium leading-tight">Entrega Grátis acima de R$ 400</p>
               </div>
               <div 
                 className="text-center p-2.5 sm:p-4 rounded-lg bg-noir-900"

@@ -121,7 +121,7 @@ export default function Home() {
                 Entrega Premium
               </h3>
               <p className="text-ivory/40 text-sm leading-relaxed">
-                Atendimento VIP e entrega em todo o Brasil com embalagem de presente
+                Entrega gratuita em Americana, Santa Bárbara D'Oeste e Nova Odessa acima de R$ 400,00
               </p>
             </div>
           </div>
