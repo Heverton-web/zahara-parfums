@@ -4,6 +4,7 @@ import { Gem, SlidersHorizontal, X } from 'lucide-react'
 import Filtros from '../components/product/Filtros'
 import ListaProdutos from '../components/product/ListaProdutos'
 import SuperPromocoes from '../components/product/SuperPromocoes'
+import Promocoes from '../components/product/Promocoes'
 
 export default function Loja() {
   const [filtros, setFiltros] = useState({ genero: '', marca: '', tag: '' })
@@ -41,6 +42,9 @@ export default function Loja() {
       {/* Super Promoções */}
       <SuperPromocoes />
 
+      {/* Promoções */}
+      <Promocoes />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Mobile filter toggle */}
         <div className="sm:hidden mb-4">
@@ -74,18 +78,18 @@ export default function Loja() {
         {/* Products count */}
         {!loading && (
           <p className="text-ivory/30 text-xs sm:text-sm mb-4 sm:mb-6">
-            {produtos.length} {produtos.length === 1 ? 'produto encontrado' : 'produtos encontrados'}
+            {produtos.filter(p => !p.em_promocao_em_massa && !p.tags?.includes('promoção') && !p.tags?.includes('oferta relâmpago')).length} {produtos.filter(p => !p.em_promocao_em_massa && !p.tags?.includes('promoção') && !p.tags?.includes('oferta relâmpago')).length === 1 ? 'produto encontrado' : 'produtos encontrados'}
           </p>
         )}
 
-        {/* Products */}
+        {/* Products - exclui promo e super promo */}
         {loading ? (
           <div className="text-center py-16 sm:py-20">
             <div className="w-12 h-12 sm:w-16 sm:h-16 border-2 border-gold/20 border-t-gold rounded-full animate-spin mx-auto mb-4" />
             <p className="font-display text-ivory/40 sm:text-ivory/50 italic text-sm sm:text-base">Carregando coleção...</p>
           </div>
         ) : produtos.length > 0 ? (
-          <ListaProdutos produtos={produtos} />
+          <ListaProdutos produtos={produtos.filter(p => !p.em_promocao_em_massa && !p.tags?.includes('promoção') && !p.tags?.includes('oferta relâmpago'))} />
         ) : (
           <div className="text-center py-16 sm:py-20">
             <Gem className="text-gold/20 mx-auto mb-4" size={48} />

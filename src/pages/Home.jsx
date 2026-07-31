@@ -3,6 +3,7 @@ import { useProdutos } from '../hooks/useProdutos'
 import { Sparkles, Crown, Gem } from 'lucide-react'
 import CardProduto from '../components/product/CardProduto'
 import SuperPromocoes from '../components/product/SuperPromocoes'
+import Promocoes from '../components/product/Promocoes'
 
 export default function Home() {
   const { produtos } = useProdutos({ ativo: true })
@@ -138,10 +139,16 @@ export default function Home() {
             <div className="w-12 h-px bg-gold/30 mx-auto" />
           </div>
 
-          {/* Grid de produtos */}
-          {produtos.length > 0 ? (
+          {/* Grid de produtos - exclui promo e super promo */}
+          {(() => {
+            const destaque = produtos.filter(p =>
+              !p.em_promocao_em_massa &&
+              !p.tags?.includes('promoção') &&
+              !p.tags?.includes('oferta relâmpago')
+            ).slice(0, 3)
+            return destaque.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {produtos.slice(0, 3).map((produto, index) => (
+              {destaque.map((produto, index) => (
                 <div
                   key={produto.id}
                   className="animate-fade-in"
@@ -158,7 +165,8 @@ export default function Home() {
                 Nenhum produto em destaque ainda.
               </p>
             </div>
-          )}
+            )
+          })()}
 
           {/* Botão ver todos */}
           <div className="text-center mt-12">
@@ -175,6 +183,9 @@ export default function Home() {
 
       {/* Super Promoções */}
       <SuperPromocoes />
+
+      {/* Promoções */}
+      <Promocoes />
 
       {/* Brand Banner */}
       <section className="py-20 sm:py-28 bg-noir-950 relative overflow-hidden">
