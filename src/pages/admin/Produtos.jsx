@@ -6,7 +6,9 @@ import Badge from '../../components/ui/Badge'
 import Modal from '../../components/ui/Modal'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import FormProduto from '../../components/product/FormProduto'
-import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Search, MoreVertical } from 'lucide-react'
+import { Plus, Pencil, Trash2, ToggleLeft, ToggleRight, Search, MoreVertical, Tag } from 'lucide-react'
+import BulkPromotionModal from '../../components/admin/BulkPromotionModal'
+import BulkPromotionList from '../../components/admin/BulkPromotionList'
 
 export default function AdminProdutos() {
   const [marcas, setMarcas] = useState([])
@@ -19,6 +21,8 @@ export default function AdminProdutos() {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [produtoToDelete, setProdutoToDelete] = useState(null)
   const [togglingId, setTogglingId] = useState(null)
+  const [bulkModalOpen, setBulkModalOpen] = useState(false)
+  const [bulkRefreshKey, setBulkRefreshKey] = useState(0)
 
   useEffect(() => {
     fetchMarcas()
@@ -103,10 +107,16 @@ export default function AdminProdutos() {
           </h1>
           <div className="w-8 sm:w-12 h-px bg-gradient-to-r from-gold/40 sm:from-gold/50 to-transparent" />
         </div>
-        <Button onClick={handleNew} className="w-full sm:w-auto text-sm">
-          <Plus size={16} className="mr-2" />
-          Novo Produto
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button onClick={() => setBulkModalOpen(true)} className="flex-1 sm:flex-initial text-sm bg-noir-800/50 text-ivory/60 hover:text-gold hover:bg-gold/10">
+            <Tag size={16} className="mr-2" />
+            Promoções em Massa
+          </Button>
+          <Button onClick={handleNew} className="flex-1 sm:flex-initial text-sm">
+            <Plus size={16} className="mr-2" />
+            Novo Produto
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -380,6 +390,24 @@ export default function AdminProdutos() {
           ))
         )}
       </div>
+
+      {/* Promoções em Massa */}
+      <div className="mt-8">
+        <div className="flex items-center gap-2 mb-4">
+          <Tag size={16} className="text-gold/50" />
+          <h2 className="font-heading text-lg font-bold text-ivory/70">Promoções em Massa</h2>
+        </div>
+        <BulkPromotionList
+          refreshKey={bulkRefreshKey}
+          onDeleted={() => { refetch(); setBulkRefreshKey(k => k + 1) }}
+        />
+      </div>
+
+      <BulkPromotionModal
+        isOpen={bulkModalOpen}
+        onClose={() => setBulkModalOpen(false)}
+        onSuccess={() => { refetch(); setBulkRefreshKey(k => k + 1) }}
+      />
 
       <Modal isOpen={modalOpen} onClose={() => { setModalOpen(false); setProdutoEditando(null) }} size="lg">
         <FormProduto

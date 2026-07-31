@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Gem } from 'lucide-react'
 import Badge from '../ui/Badge'
+import CountdownTimer from '../ui/CountdownTimer'
 import WhatsAppModal from './WhatsAppModal'
 import { buildWhatsAppLink } from '../../lib/whatsapp'
 
@@ -9,6 +10,7 @@ const tagColors = {
   'lançamento': 'gold',
   'promoção': 'wine',
   'oferta relâmpago': 'danger',
+  'SUPER PROMOÇÃO': 'danger',
 }
 
 export default function CardProduto({ produto }) {
@@ -70,7 +72,25 @@ export default function CardProduto({ produto }) {
               {(() => {
                 const preco = Number(produto.preco_original) || 0
                 const precoPromo = Number(produto.preco_promocional) || preco
-                const temPromo = (produto.tags?.includes('promoção') || produto.tags?.includes('oferta relâmpago')) && precoPromo
+                const precoEmMassa = Number(produto.preco_em_massa)
+                const emMassa = produto.em_promocao_em_massa && produto.promocoes_em_massa?.data_fim && new Date(produto.promocoes_em_massa.data_fim) > new Date()
+                const temPromo = !emMassa && (produto.tags?.includes('promoção') || produto.tags?.includes('oferta relâmpago')) && precoPromo
+
+                if (emMassa && precoEmMassa) {
+                  return (
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-white/50 line-through text-sm drop-shadow-lg">
+                          R$ {preco.toFixed(2)}
+                        </span>
+                        <span className="text-emerald-400 font-bold text-lg drop-shadow-lg">
+                          R$ {precoEmMassa.toFixed(2)}
+                        </span>
+                      </div>
+                      <CountdownTimer dataFim={produto.promocoes_em_massa.data_fim} size="sm" />
+                    </div>
+                  )
+                }
                 if (temPromo) {
                   return (
                     <div className="flex items-center gap-2">

@@ -29,7 +29,7 @@ export function useProdutos(filtros = {}) {
     try {
       let query = supabase
         .from('produtos')
-        .select('*, marcas(id, nome, logo_url)')
+        .select('*, marcas(id, nome, logo_url), promocoes_em_massa(id, nome, data_fim, tag)')
 
       if (filtros.ativo !== undefined) {
         query = query.eq('ativo', filtros.ativo)
@@ -68,7 +68,7 @@ export function useProdutos(filtros = {}) {
 export async function fetchProdutoById(id) {
   const { data, error } = await supabase
     .from('produtos')
-    .select('*, marcas(id, nome, logo_url)')
+    .select('*, marcas(id, nome, logo_url), promocoes_em_massa(id, nome, data_fim, tag)')
     .eq('id', id)
     .single()
 

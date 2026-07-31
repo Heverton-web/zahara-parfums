@@ -6,11 +6,13 @@ import { produtosMock } from '../data/mock'
 import { buildWhatsAppLink } from '../lib/whatsapp'
 import WhatsAppModal from '../components/product/WhatsAppModal'
 import Badge from '../components/ui/Badge'
+import CountdownTimer from '../components/ui/CountdownTimer'
 
 const tagColors = {
   'lançamento': 'gold',
   'promoção': 'wine',
   'oferta relâmpago': 'danger',
+  'SUPER PROMOÇÃO': 'danger',
 }
 
 export default function Produto() {
@@ -134,7 +136,25 @@ export default function Produto() {
               {(() => {
                 const preco = Number(produto.preco_original) || 0
                 const precoPromo = Number(produto.preco_promocional) || preco
-                const temPromo = (produto.tags?.includes('promoção') || produto.tags?.includes('oferta relâmpago')) && precoPromo
+                const precoEmMassa = Number(produto.preco_em_massa)
+                const emMassa = produto.em_promocao_em_massa && produto.promocoes_em_massa?.data_fim && new Date(produto.promocoes_em_massa.data_fim) > new Date()
+                const temPromo = !emMassa && (produto.tags?.includes('promoção') || produto.tags?.includes('oferta relâmpago')) && precoPromo
+
+                if (emMassa && precoEmMassa) {
+                  return (
+                    <div>
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="text-ivory/40 line-through text-xl sm:text-2xl">
+                          R$ {preco.toFixed(2)}
+                        </span>
+                        <span className="price-tag text-3xl sm:text-4xl md:text-5xl text-emerald-400">
+                          R$ {precoEmMassa.toFixed(2)}
+                        </span>
+                      </div>
+                      <CountdownTimer dataFim={produto.promocoes_em_massa.data_fim} size="md" />
+                    </div>
+                  )
+                }
                 if (temPromo) {
                   return (
                     <div className="flex items-center gap-3">
