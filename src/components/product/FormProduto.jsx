@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { X, Check, Image as ImageIcon, Link2, Loader2, Sparkles, Search, ArrowLeft, ChevronRight, Plus } from 'lucide-react'
 import { createProduto, updateProduto, createMarca } from '../../hooks/useProdutos'
 import { searchBrands, listPerfumesByBrand, scrapeFragrantica, isFragranticaUrl, matchMarca, openFragranticaSearch, parseFragranticaUrl, validateFragranticaUrl } from '../../lib/fragrantica'
+import { scrapeUrl } from '../../lib/scrapeUrl'
 
 const generos = [
   { value: 'masculino', label: 'Masculino' },
@@ -430,7 +431,9 @@ export default function FormProduto({ produto, marcas = [], onMarcaCriada, onSuc
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Fragrantica URL paste state
+  // URL scraping state
+  const [genericUrl, setGenericUrl] = useState('')
+  const [scrapingUrl, setScrapingUrl] = useState(false)
   const [fragUrl, setFragUrl] = useState('')
 
   useEffect(() => {
@@ -557,18 +560,75 @@ export default function FormProduto({ produto, marcas = [], onMarcaCriada, onSuc
         <FragranticaSearch marcas={marcas} onAutoFill={handleAutoFill} onBrandSaved={onMarcaCriada} />
       )}
 
-      {/* URL paste for quick fill (both modes) */}
-      <div className="mb-4">
-        <InputField label="URL do Fragrantica (colar para auto-preenchimento)">
-          <input
-            type="url"
-            value={fragUrl}
-            onChange={handleFragranticaUrlPaste}
-            placeholder="https://www.fragrantica.com.br/perfume/..."
-            className={inputClass}
-          />
-        </InputField>
-      </div>
+      {/* URL scraping - qualquer site */}
+      {!isEditing && (
+        <div className="mb-4 p-3 rounded-xl bg-noir-800/30 border border-ivory/5">
+          <div className="flex items-center gap-2 mb-2">
+            <Link2 size={13} className="text-gold/70" />
+            <span className="text-[11px] font-medium text-ivory/50">
+              Colar URL de qualquer site (marca, Google Shopping, etc.)
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="url"
+              value={genericUrl}
+              onChange={(e) => setGenericUrl(e.target.value)}
+              placeholder="https://..."
+              className={`${inputClass} flex-1 text-xs`}
+              disabled={scrapingUrl}
+            />
+            <button
+              type="button"
+              onClick={async () => {
+                if (!genericUrl.trim()) return
+                setScrapingUrl(true)
+                try {
+                  const data = await scrapeUrl(genericUrl.trim())
+                  if (data?.error) {
+                    setError(data.error)
+                  } else {
+                    handleAutoFill({
+                      nome: data.nome || '',
+                      brand: data.brand || '',
+                      genero: data.genero || 'unissex',
+                      descricao: data.descricao || '',
+                      imagem_url: data.imagem_url || '',
+                    })
+                    if (data.preco_ref) {
+                      setForm(prev => ({ ...prev, preco_original: data.preco_ref }))
+                    }
+                  }
+                } catch (err) {
+                  setError('Erro ao extrair dados da URL. Preencha manualmente.')
+                }
+                setScrapingUrl(false)
+              }}
+              disabled={scrapingUrl || !genericUrl.trim()}
+              className="px-3 py-2 rounded-lg bg-gold/10 text-gold border border-gold/20 hover:bg-gold/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+            >
+              {scrapingUrl ? <Loader2 size={14} className="animate-spin" /> : <Link2 size={14} />}
+              <span className="text-xs">Extrair</span>
+            </button>
+          </div>
+          {scrapingUrl && <ShimmerSpinner message="Extraindo dados da URL..." />}
+        </div>
+      )}
+
+      {/* Fragrantica URL paste (modo edição) */}
+      {isEditing && (
+        <div className="mb-4">
+          <InputField label="URL do Fragrantica (colar para auto-preenchimento)">
+            <input
+              type="url"
+              value={fragUrl}
+              onChange={handleFragranticaUrlPaste}
+              placeholder="https://www.fragrantica.com.br/perfume/..."
+              className={inputClass}
+            />
+          </InputField>
+        </div>
+      )}
 
       {error && (
         <div className="p-2.5 rounded-lg text-sm mb-3 bg-red-500/10 text-red-400 border border-red-500/20">
