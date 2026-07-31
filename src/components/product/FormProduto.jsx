@@ -71,7 +71,8 @@ export default function FormProduto({ produto, marcas = [], onSuccess, onCancel 
     nome: '',
     marca_id: '',
     genero: 'masculino',
-    preco: '',
+    preco_original: '',
+    preco_promocional: '',
     descricao: '',
     tags: [],
     imagem_url: '',
@@ -93,7 +94,8 @@ export default function FormProduto({ produto, marcas = [], onSuccess, onCancel 
         nome: produto.nome || '',
         marca_id: produto.marca_id || '',
         genero: produto.genero || 'masculino',
-        preco: produto.preco?.toString() || '',
+        preco_original: produto.preco_original?.toString() || '',
+        preco_promocional: produto.preco_promocional?.toString() || '',
         descricao: produto.descricao || '',
         tags: produto.tags || [],
         imagem_url: produto.imagem_url || '',
@@ -219,7 +221,8 @@ export default function FormProduto({ produto, marcas = [], onSuccess, onCancel 
         nome: form.nome,
         marca_id: form.marca_id || null,
         genero: form.genero,
-        preco: parseFloat(form.preco) || 0,
+        preco_original: parseFloat(form.preco_original) || 0,
+        preco_promocional: parseFloat(form.preco_promocional) || null,
         descricao: form.descricao,
         tags: form.tags,
         imagem_url: form.imagem_url || null,
@@ -384,16 +387,28 @@ export default function FormProduto({ produto, marcas = [], onSuccess, onCancel 
                 ))}
               </select>
             </InputField>
-            <InputField label="Preço (R$)">
+            <InputField label="Preço Original (R$)">
               <input
                 type="number"
-                name="preco"
-                value={form.preco}
+                name="preco_original"
+                value={form.preco_original}
                 onChange={handleChange}
                 placeholder="0,00"
                 step="0.01"
                 min="0"
                 required
+                className={inputClass}
+              />
+            </InputField>
+            <InputField label="Preço Promocional (R$)">
+              <input
+                type="number"
+                name="preco_promocional"
+                value={form.preco_promocional}
+                onChange={handleChange}
+                placeholder="0,00 (opcional)"
+                step="0.01"
+                min="0"
                 className={inputClass}
               />
             </InputField>

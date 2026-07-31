@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Gem, Shield, Truck, Gift } from 'lucide-react'
 import { fetchProdutoById } from '../hooks/useProdutos'
-import { produtosMock, marcasMock } from '../data/mock'
+import { produtosMock } from '../data/mock'
 import { buildWhatsAppLink } from '../lib/whatsapp'
 import WhatsAppModal from '../components/product/WhatsAppModal'
 import Badge from '../components/ui/Badge'
@@ -130,9 +130,28 @@ export default function Produto() {
 
             {/* Price */}
             <div className="mb-6 sm:mb-8">
-              <p className="price-tag text-3xl sm:text-4xl md:text-5xl">
-                R$ {produto.preco.toFixed(2)}
-              </p>
+              {(() => {
+                const preco = Number(produto.preco_original) || 0
+                const precoPromo = Number(produto.preco_promocional) || preco
+                const temPromo = (produto.tags?.includes('promoção') || produto.tags?.includes('oferta relâmpago')) && precoPromo
+                if (temPromo) {
+                  return (
+                    <div className="flex items-center gap-3">
+                      <span className="text-ivory/40 line-through text-xl sm:text-2xl">
+                        R$ {preco.toFixed(2)}
+                      </span>
+                      <span className="price-tag text-3xl sm:text-4xl md:text-5xl text-emerald-400">
+                        R$ {precoPromo.toFixed(2)}
+                      </span>
+                    </div>
+                  )
+                }
+                return (
+                  <p className="price-tag text-3xl sm:text-4xl md:text-5xl">
+                    R$ {preco.toFixed(2)}
+                  </p>
+                )
+              })()}
             </div>
 
             {/* Description */}

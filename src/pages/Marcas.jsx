@@ -29,13 +29,29 @@ export default function Marcas() {
       return
     }
 
-    const { data } = await supabase
-      .from('marcas')
-      .select('*, produtos!inner(id, nome, imagem_url, preco, ativo)')
-      .order('nome')
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('marcas')
+        .select('*, produtos!inner(id, nome, imagem_url, preco, ativo)')
+        .order('nome')
 
-    if (data) {
-      setMarcas(data.filter(m => m.produtos.some(p => p.ativo)))
+      if (fetchError) {
+        console.warn('Supabase indisponível, usando dados mock')
+        const marcasComProdutos = marcasMock.map(marca => ({
+          ...marca,
+          produtos: produtosMock.filter(p => p.marca_id === marca.id && p.ativo)
+        })).filter(m => m.produtos.length > 0)
+        setMarcas(marcasComProdutos)
+      } else if (data) {
+        setMarcas(data.filter(m => m.produtos.some(p => p.ativo)))
+      }
+    } catch {
+      console.warn('Supabase indisponível, usando dados mock')
+      const marcasComProdutos = marcasMock.map(marca => ({
+        ...marca,
+        produtos: produtosMock.filter(p => p.marca_id === marca.id && p.ativo)
+      })).filter(m => m.produtos.length > 0)
+      setMarcas(marcasComProdutos)
     }
     setLoading(false)
   }
@@ -129,7 +145,7 @@ export default function Marcas() {
                           {produto.nome}
                         </h3>
                         <p className="price-tag text-base sm:text-lg">
-                          R$ {produto.preco.toFixed(2)}
+                          R$ {(Number(produto.preco) || 0).toFixed(2)}
                         </p>
                       </div>
                     </Link>

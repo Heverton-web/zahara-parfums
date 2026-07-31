@@ -2,6 +2,17 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { produtosMock, marcasMock } from '../data/mock'
 
+// Aplica filtros aos dados mock (mesma lógica do Supabase)
+function filtrarMock(lista, filtros) {
+  return lista.filter(p => {
+    if (filtros.ativo !== undefined && p.ativo !== filtros.ativo) return false
+    if (filtros.genero && p.genero !== filtros.genero) return false
+    if (filtros.marca && p.marca_id !== filtros.marca) return false
+    if (filtros.tag && !p.tags?.includes(filtros.tag)) return false
+    return true
+  })
+}
+
 export function useProdutos(filtros = {}) {
   const [produtos, setProdutos] = useState([])
   const [loading, setLoading] = useState(true)
@@ -39,13 +50,13 @@ export function useProdutos(filtros = {}) {
 
       if (fetchError) {
         console.warn('Supabase indisponível, usando dados mock')
-        setProdutos(produtosMock)
+        setProdutos(filtrarMock(produtosMock))
       } else {
         setProdutos(data || [])
       }
     } catch {
       console.warn('Supabase indisponível, usando dados mock')
-      setProdutos(produtosMock)
+      setProdutos(filtrarMock(produtosMock))
     }
 
     setLoading(false)

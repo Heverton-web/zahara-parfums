@@ -67,9 +67,28 @@ export default function CardProduto({ produto }) {
             
             {/* Preço sobreposto na imagem */}
             <div className="absolute bottom-3 left-3">
-              <span className="text-white font-bold text-lg drop-shadow-lg">
-                R$ {produto.preco.toFixed(2)}
-              </span>
+              {(() => {
+                const preco = Number(produto.preco_original) || 0
+                const precoPromo = Number(produto.preco_promocional) || preco
+                const temPromo = (produto.tags?.includes('promoção') || produto.tags?.includes('oferta relâmpago')) && precoPromo
+                if (temPromo) {
+                  return (
+                    <div className="flex items-center gap-2">
+                      <span className="text-white/50 line-through text-sm drop-shadow-lg">
+                        R$ {preco.toFixed(2)}
+                      </span>
+                      <span className="text-emerald-400 font-bold text-lg drop-shadow-lg">
+                        R$ {precoPromo.toFixed(2)}
+                      </span>
+                    </div>
+                  )
+                }
+                return (
+                  <span className="text-white font-bold text-lg drop-shadow-lg">
+                    R$ {preco.toFixed(2)}
+                  </span>
+                )
+              })()}
             </div>
           </div>
         </Link>

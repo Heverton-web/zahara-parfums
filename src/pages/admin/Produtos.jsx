@@ -25,8 +25,21 @@ export default function AdminProdutos() {
   }, [])
 
   async function fetchMarcas() {
-    const { data } = await supabase.from('marcas').select('*').order('nome')
-    if (data) setMarcas(data)
+    try {
+      const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_URL !== 'sua_url_aqui'
+      if (!isSupabaseConfigured) {
+        const { marcasMock } = await import('../../data/mock')
+        setMarcas(marcasMock)
+        return
+      }
+      const { data, error } = await supabase.from('marcas').select('*').order('nome')
+      if (error) throw error
+      if (data) setMarcas(data)
+    } catch (err) {
+      console.warn('Marcas fetch error:', err)
+      const { marcasMock } = await import('../../data/mock')
+      setMarcas(marcasMock)
+    }
   }
 
   function handleEdit(produto) {
@@ -196,7 +209,12 @@ export default function AdminProdutos() {
                     <td className="px-5 py-3 text-ivory/40 text-sm">{produto.marcas?.nome || '-'}</td>
                     <td className="px-5 py-3 text-ivory/40 text-sm capitalize">{produto.genero}</td>
                     <td className="px-5 py-3">
-                      <span className="price-tag text-sm">R$ {produto.preco.toFixed(2)}</span>
+                      <div className="flex flex-col">
+                        <span className="price-tag text-sm">R$ {(Number(produto.preco_original) || 0).toFixed(2)}</span>
+                        {produto.preco_promocional && (
+                          <span className="text-emerald-400 text-xs">→ R$ {Number(produto.preco_promocional).toFixed(2)}</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex gap-1 flex-wrap">
@@ -293,7 +311,10 @@ export default function AdminProdutos() {
                     {produto.nome}
                   </h3>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="price-tag text-sm">R$ {produto.preco.toFixed(2)}</span>
+                    <span className="price-tag text-sm">R$ {(Number(produto.preco_original) || 0).toFixed(2)}</span>
+                    {produto.preco_promocional && (
+                      <span className="text-emerald-400 text-xs">→ R$ {Number(produto.preco_promocional).toFixed(2)}</span>
+                    )}
                     <Badge variant={produto.ativo ? 'success' : 'danger'} className="text-[9px] px-1.5 py-0">
                       {produto.ativo ? 'Ativo' : 'Inativo'}
                     </Badge>

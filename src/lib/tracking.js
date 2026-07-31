@@ -41,21 +41,26 @@ export function generateFingerprint() {
 }
 
 export async function registerEvent(produtoId, tipo, ip) {
-  const ua = navigator.userAgent
-  const parsed = parseUserAgent(ua)
-  const fingerprint = generateFingerprint()
-  const pais = await getCountry(ip)
+  try {
+    const ua = navigator.userAgent
+    const parsed = parseUserAgent(ua)
+    const fingerprint = generateFingerprint()
+    const pais = await getCountry(ip)
 
-  await supabase.from('tracking').insert({
-    produto_id: produtoId,
-    tipo,
-    ip,
-    user_agent: ua,
-    dispositivo: parsed.dispositivo,
-    navegador: parsed.navegador,
-    so: parsed.so,
-    pais,
-    fingerprint,
-    referrer: document.referrer || null,
-  })
+    const { error } = await supabase.from('tracking').insert({
+      produto_id: produtoId,
+      tipo,
+      ip,
+      user_agent: ua,
+      dispositivo: parsed.dispositivo,
+      navegador: parsed.navegador,
+      so: parsed.so,
+      pais,
+      fingerprint,
+      referrer: document.referrer || null,
+    })
+    if (error) console.warn('Tracking insert error:', error)
+  } catch (err) {
+    console.warn('Tracking failed:', err)
+  }
 }

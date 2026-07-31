@@ -1,4 +1,4 @@
-export default function Select({ label, options, className = '', ...props }) {
+export default function Select({ label, options = [], className = '', ...props }) {
   return (
     <div className="flex flex-col gap-2">
       {label && (

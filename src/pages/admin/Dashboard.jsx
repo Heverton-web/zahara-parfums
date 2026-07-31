@@ -20,71 +20,73 @@ export default function Dashboard() {
   }, [])
 
   async function fetchStats() {
-    const hoje = new Date()
-    hoje.setHours(0, 0, 0, 0)
+    try {
+      const hoje = new Date()
+      hoje.setHours(0, 0, 0, 0)
 
-    const [produtos, views, cliques, chartData, top, devices] = await Promise.all([
-      supabase.from('produtos').select('id, ativo'),
-      supabase.from('tracking').select('*').eq('tipo', 'view').gte('criado_em', hoje.toISOString()),
-      supabase.from('tracking').select('*').eq('tipo', 'click').gte('criado_em', hoje.toISOString()),
-      supabase.from('tracking').select('tipo, criado_em').gte('criado_em', new Date(Date.now() - 7 * 86400000).toISOString()),
-      supabase.from('tracking').select('produto_id, produtos(nome)').eq('tipo', 'view').gte('criado_em', new Date(Date.now() - 7 * 86400000).toISOString()),
-      supabase.from('tracking').select('dispositivo').gte('criado_em', new Date(Date.now() - 30 * 86400000).toISOString()),
-    ])
+      const [produtos, views, cliques, chartData, top, devices] = await Promise.all([
+        supabase.from('produtos').select('id, ativo').catch(() => ({ data: null })),
+        supabase.from('tracking').select('*').eq('tipo', 'view').gte('criado_em', hoje.toISOString()).catch(() => ({ data: null })),
+        supabase.from('tracking').select('*').eq('tipo', 'click').gte('criado_em', hoje.toISOString()).catch(() => ({ data: null })),
+        supabase.from('tracking').select('tipo, criado_em').gte('criado_em', new Date(Date.now() - 7 * 86400000).toISOString()).catch(() => ({ data: null })),
+        supabase.from('tracking').select('produto_id, produtos(nome)').eq('tipo', 'view').gte('criado_em', new Date(Date.now() - 7 * 86400000).toISOString()).catch(() => ({ data: null })),
+        supabase.from('tracking').select('dispositivo').gte('criado_em', new Date(Date.now() - 30 * 86400000).toISOString()).catch(() => ({ data: null })),
+      ])
 
-    if (produtos.data) {
       setStats(prev => ({
         ...prev,
-        totalProdutos: produtos.data.length,
-        produtosAtivos: produtos.data.filter(p => p.ativo).length,
+        totalProdutos: produtos.data?.length || 0,
+        produtosAtivos: produtos.data?.filter(p => p.ativo).length || 0,
         viewsHoje: views.data?.length || 0,
         cliquesHoje: cliques.data?.length || 0,
       }))
-    }
 
-    // Processar dados do gráfico (7 dias)
-    if (chartData.data) {
-      const days = {}
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date(Date.now() - i * 86400000)
-        const key = d.toISOString().split('T')[0]
-        days[key] = { dia: key, views: 0, cliques: 0 }
-      }
-      chartData.data.forEach(item => {
-        const key = item.criado_em.split('T')[0]
-        if (days[key]) {
-          days[key][item.tipo === 'view' ? 'views' : 'cliques']++
+      // Processar dados do gráfico (7 dias)
+      if (chartData?.data) {
+        const days = {}
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(Date.now() - i * 86400000)
+          const key = d.toISOString().split('T')[0]
+          days[key] = { dia: key, views: 0, cliques: 0 }
         }
-      })
-      setViewsChart(Object.values(days))
-    }
+        chartData.data.forEach(item => {
+          const key = item.criado_em.split('T')[0]
+          if (days[key]) {
+            days[key][item.tipo === 'view' ? 'views' : 'cliques']++
+          }
+        })
+        setViewsChart(Object.values(days))
+      }
 
-    // Top produtos
-    if (top.data) {
-      const counts = {}
-      top.data.forEach(item => {
-        const nome = item.produtos?.nome || 'Desconhecido'
-        counts[nome] = (counts[nome] || 0) + 1
-      })
-      const sorted = Object.entries(counts)
-        .sort(([,a], [,b]) => b - a)
-        .slice(0, 5)
-        .map(([name, value]) => ({ name, value }))
-      setTopProdutos(sorted)
-    }
+      // Top produtos
+      if (top?.data) {
+        const counts = {}
+        top.data.forEach(item => {
+          const nome = item.produtos?.nome || 'Desconhecido'
+          counts[nome] = (counts[nome] || 0) + 1
+        })
+        const sorted = Object.entries(counts)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 5)
+          .map(([name, value]) => ({ name, value }))
+        setTopProdutos(sorted)
+      }
 
-    // Dispositivos
-    if (devices.data) {
-      const devs = {}
-      devices.data.forEach(item => {
-        devs[item.dispositivo] = (devs[item.dispositivo] || 0) + 1
-      })
-      const colors = ['#C9A84C', '#7a1c42', '#065f46', '#A0A0A0']
-      setDispositivos(
-        Object.entries(devs).map(([name, value], i) => ({
-          name, value, color: colors[i % colors.length]
-        }))
-      )
+      // Dispositivos
+      if (devices?.data) {
+        const devs = {}
+        devices.data.forEach(item => {
+          devs[item.dispositivo] = (devs[item.dispositivo] || 0) + 1
+        })
+        const colors = ['#C9A84C', '#7a1c42', '#065f46', '#A0A0A0']
+        setDispositivos(
+          Object.entries(devs).map(([name, value], i) => ({
+            name, value, color: colors[i % colors.length]
+          }))
+        )
+      }
+    } catch (err) {
+      console.warn('Dashboard fetch error:', err)
     }
   }
 
