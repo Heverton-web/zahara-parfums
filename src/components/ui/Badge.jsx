@@ -1,11 +1,11 @@
 export default function Badge({ children, variant = 'default', className = '' }) {
   const variants = {
     default: 'bg-noir-800 text-ivory/80',
-    gold: 'bg-gold/30 text-gold-light',
-    success: 'bg-emerald-500/30 text-emerald-300',
-    danger: 'bg-red-500/30 text-red-300',
-    warning: 'bg-yellow-500/30 text-yellow-300',
-    wine: 'bg-wine/40 text-wine-100',
+    gold: 'bg-gold text-noir-900',
+    success: 'bg-emerald-500 text-white',
+    danger: 'bg-red-500 text-white',
+    warning: 'bg-yellow-500 text-noir-900',
+    wine: 'bg-wine text-wine-100',
   }
 
   const borderColors = {
@@ -17,20 +17,20 @@ export default function Badge({ children, variant = 'default', className = '' })
     wine: 'rgba(220, 50, 100, 0.6)',
   }
 
-  const shadows = {
-    gold: '0 0 8px rgba(201, 168, 76, 0.3)',
-    success: '0 0 8px rgba(16, 185, 129, 0.3)',
-    danger: '0 0 8px rgba(239, 68, 68, 0.3)',
-    warning: '0 0 8px rgba(234, 179, 8, 0.3)',
-    wine: '0 0 10px rgba(200, 50, 100, 0.4)',
+  const glows = {
+    gold: '0 0 12px rgba(212, 175, 55, 0.6), 0 0 24px rgba(212, 175, 55, 0.3)',
+    success: '0 0 12px rgba(16, 185, 129, 0.6), 0 0 24px rgba(16, 185, 129, 0.3)',
+    danger: '0 0 12px rgba(239, 68, 68, 0.6), 0 0 24px rgba(239, 68, 68, 0.3)',
+    warning: '0 0 12px rgba(234, 179, 8, 0.6), 0 0 24px rgba(234, 179, 8, 0.3)',
+    wine: '0 0 12px rgba(220, 50, 100, 0.6), 0 0 24px rgba(220, 50, 100, 0.3)',
   }
 
   return (
     <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${variants[variant]} ${className}`}
+      className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider badge-pulse ${variants[variant]} ${className}`}
       style={{
         border: `1px solid ${borderColors[variant]}`,
-        boxShadow: shadows[variant] || 'none',
+        boxShadow: glows[variant] || 'none',
       }}
     >
       {children}
