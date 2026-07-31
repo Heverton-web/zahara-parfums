@@ -1,6 +1,6 @@
 import { useCountdown } from '../../hooks/useCountdown'
 
-export default function CountdownTimer({ dataFim, size = 'sm' }) {
+export default function CountdownTimer({ dataFim, size = 'sm', fullWidth = false }) {
   const { formatado, expirado, total } = useCountdown(dataFim)
 
   if (expirado || !formatado) return null
@@ -20,7 +20,7 @@ export default function CountdownTimer({ dataFim, size = 'sm' }) {
 
   return (
     <div
-      className={`inline-flex items-center font-mono font-bold rounded-full ${sizes[size]} ${textColors}`}
+      className={`flex items-center justify-center font-mono font-bold rounded-full ${fullWidth ? 'w-full' : 'inline-flex'} ${sizes[size]} ${textColors}`}
       style={{
         border: `1px solid ${isUrgente ? 'rgba(239, 68, 68, 0.4)' : 'rgba(212, 175, 55, 0.3)'}`,
         background: isUrgente

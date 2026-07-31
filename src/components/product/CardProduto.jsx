@@ -134,8 +134,8 @@ export default function CardProduto({ produto }) {
           {(() => {
             const emMassa = produto.em_promocao_em_massa && produto.promocoes_em_massa?.data_fim && new Date(produto.promocoes_em_massa.data_fim) > new Date()
             return emMassa ? (
-              <div className="mb-3">
-                <CountdownTimer dataFim={produto.promocoes_em_massa.data_fim} size="md" />
+              <div className="mb-3 w-full">
+                <CountdownTimer dataFim={produto.promocoes_em_massa.data_fim} size="md" fullWidth />
               </div>
             ) : null
           })()}
