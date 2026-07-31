@@ -3,31 +3,56 @@
 
 import { supabase } from './supabase'
 
-export async function searchAndScrape(query) {
-  if (!query || query.trim().length < 2) return null
+const BASE_BRAND_URL = 'https://www.fragrantica.com.br/desenhista/'
+
+// ─── Step 1: Buscar marcas ──────────────────────────────────
+
+export async function searchBrands(query) {
+  if (!query || query.trim().length < 2) return []
 
   const { data, error } = await supabase.functions.invoke('scrape-fragrantica', {
-    body: { query },
+    body: { action: 'searchBrands', query: query.trim() },
+  })
+
+  if (error) throw error
+  return data || []
+}
+
+// ─── Step 2: Listar perfumes de uma marca ────────────────────
+
+export async function listPerfumesByBrand(brandSlug) {
+  if (!brandSlug) return null
+
+  const { data, error } = await supabase.functions.invoke('scrape-fragrantica', {
+    body: { action: 'listPerfumes', brandSlug },
   })
 
   if (error) throw error
   return data
 }
+
+// ─── Step 3: Scrape detalhes do perfume ──────────────────────
 
 export async function scrapeFragrantica(url) {
   if (!url || !url.includes('fragrantica.com')) return null
 
   const { data, error } = await supabase.functions.invoke('scrape-fragrantica', {
-    body: { url },
+    body: { action: 'scrapePerfume', url },
   })
 
   if (error) throw error
   return data
 }
 
+// ─── Helpers ─────────────────────────────────────────────────
+
 export function openFragranticaSearch(query) {
   const searchUrl = `https://www.fragrantica.com.br/search/?query=${encodeURIComponent(query)}`
   window.open(searchUrl, '_blank')
+}
+
+export function openFragranticaBrand(brandSlug) {
+  window.open(`${BASE_BRAND_URL}${brandSlug}.html`, '_blank')
 }
 
 export function isFragranticaUrl(url) {
@@ -35,8 +60,6 @@ export function isFragranticaUrl(url) {
 }
 
 // Padrão: fragrantica.com.br/perfume/{Marca}/{Nome-Perfume}-{ID}.html
-// Ex: fragrantica.com.br/perfume/Creed/Aventus-for-Her-38497.html
-// Ex: fragrantica.com.br/perfume/French-Avenue/Liquid-Brun-94713.html
 const FRAGRANTICA_PERFUME_RE = /fragrantica\.com\.?\w*\/perfume\/([^/]+)\/([^-]+)-(\d+)\.html/
 
 export function parseFragranticaUrl(url) {
@@ -55,13 +78,13 @@ export function validateFragranticaUrl(url) {
 
 export function matchMarca(searchBrand, marcas) {
   if (!searchBrand || !marcas?.length) return null
-  
+
   const normalized = searchBrand.toLowerCase().trim()
-  
+
   return marcas.find(m => {
     const marcaNome = m.nome.toLowerCase().trim()
-    return marcaNome === normalized || 
-           normalized.includes(marcaNome) || 
+    return marcaNome === normalized ||
+           normalized.includes(marcaNome) ||
            marcaNome.includes(normalized)
   }) || null
 }
