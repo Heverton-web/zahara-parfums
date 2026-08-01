@@ -183,7 +183,7 @@ export default function PromocoesEmMassa() {
   )
 
   return (
-    <div>
+    <div className="pt-2 sm:pt-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
         <div>
@@ -193,8 +193,8 @@ export default function PromocoesEmMassa() {
           <div className="w-8 sm:w-12 h-px bg-gradient-to-r from-gold/40 sm:from-gold/50 to-transparent" />
         </div>
         <Button onClick={handleNew} className="w-full sm:w-auto text-sm">
-          <Plus size={16} className="mr-2" />
-          Nova Promoção
+          <Plus size={16} />
+          <span>Nova Promoção</span>
         </Button>
       </div>
 

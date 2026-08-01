@@ -104,8 +104,8 @@ export default function AdminProdutos() {
           <div className="w-8 sm:w-12 h-px bg-gradient-to-r from-gold/40 sm:from-gold/50 to-transparent" />
         </div>
         <Button onClick={handleNew} className="w-full sm:w-auto text-sm">
-          <Plus size={16} className="mr-2" />
-          Novo Produto
+          <Plus size={16} />
+          <span>Novo Produto</span>
         </Button>
       </div>
 

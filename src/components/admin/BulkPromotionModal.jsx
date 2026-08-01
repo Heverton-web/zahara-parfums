@@ -227,20 +227,20 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promoca
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
-      <div className="absolute inset-0 bg-black/80" onClick={onClose} />
+    <div className="fixed inset-0 flex items-center justify-center p-2 sm:p-4" style={{ zIndex: 9999 }}>
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
 
       <div
-        className="relative w-full max-w-[700px] rounded-2xl shadow-2xl mx-auto max-h-[90vh] flex flex-col"
+        className="relative w-full max-w-[700px] rounded-2xl shadow-2xl mx-auto max-h-[92vh] sm:max-h-[85vh] flex flex-col"
         style={{ backgroundColor: '#0a0a0f', border: '1px solid rgba(212, 175, 55, 0.12)' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 pb-0">
+        <div className="flex items-center justify-between p-4 sm:p-5 pb-0 sm:pb-0">
           <div>
-            <h2 className="font-heading text-xl font-bold text-ivory">
+            <h2 className="font-heading text-lg sm:text-xl font-bold text-ivory">
               {promocao ? 'Editar Promoção' : 'Nova Promoção em Massa'}
             </h2>
-            <div className="w-8 h-px bg-gradient-to-r from-gold/50 to-transparent mt-1.5" />
+            <div className="w-8 h-px bg-gradient-to-r from-gold/50 to-transparent mt-1" />
           </div>
           <button
             onClick={onClose}
@@ -252,16 +252,16 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promoca
         </div>
 
         {/* Content */}
-        <form onSubmit={handleSubmit} className="p-5 overflow-y-auto flex-1 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-3.5 sm:space-y-4">
           {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs sm:text-sm">
               {error}
             </div>
           )}
 
           {/* Nome */}
           <div>
-            <label className="block text-ivory/50 text-xs font-accent uppercase tracking-wider mb-1.5">
+            <label className="block text-ivory/50 text-[11px] sm:text-xs font-accent uppercase tracking-wider mb-1">
               Nome da Promoção
             </label>
             <input
@@ -275,7 +275,7 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promoca
 
           {/* Tag */}
           <div>
-            <label className="block text-ivory/50 text-xs font-accent uppercase tracking-wider mb-1.5">
+            <label className="block text-ivory/50 text-[11px] sm:text-xs font-accent uppercase tracking-wider mb-1">
               Tag da Promoção
             </label>
             <div className="relative">
@@ -291,9 +291,9 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promoca
           </div>
 
           {/* Datas */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-ivory/50 text-xs font-accent uppercase tracking-wider mb-1.5">
+              <label className="block text-ivory/50 text-[11px] sm:text-xs font-accent uppercase tracking-wider mb-1">
                 Data de Início
               </label>
               <input
@@ -304,7 +304,7 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promoca
               />
             </div>
             <div>
-              <label className="block text-ivory/50 text-xs font-accent uppercase tracking-wider mb-1.5">
+              <label className="block text-ivory/50 text-[11px] sm:text-xs font-accent uppercase tracking-wider mb-1">
                 Data de Término
               </label>
               <input
@@ -316,63 +316,63 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promoca
             </div>
           </div>
 
-          {/* Tipo de desconto + Valor */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-ivory/50 text-xs font-accent uppercase tracking-wider mb-1.5">
-                Tipo de Desconto
-              </label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setTipoDesconto('fixo')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                    tipoDesconto === 'fixo'
-                      ? 'bg-gold/15 text-gold border border-gold/30'
-                      : 'bg-noir-800/50 text-ivory/40 border border-ivory/5 hover:border-ivory/15'
-                  }`}
-                >
-                  <DollarSign size={14} />
-                  Valor Fixo
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTipoDesconto('percentual')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                    tipoDesconto === 'percentual'
-                      ? 'bg-gold/15 text-gold border border-gold/30'
-                      : 'bg-noir-800/50 text-ivory/40 border border-ivory/5 hover:border-ivory/15'
-                  }`}
-                >
-                  <Percent size={14} />
-                  Percentual
-                </button>
-              </div>
+          {/* Tipo de Desconto */}
+          <div>
+            <label className="block text-ivory/50 text-[11px] sm:text-xs font-accent uppercase tracking-wider mb-1">
+              Tipo de Desconto
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setTipoDesconto('fixo')}
+                className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                  tipoDesconto === 'fixo'
+                    ? 'bg-gold/15 text-gold border border-gold/30'
+                    : 'bg-noir-800/50 text-ivory/40 border border-ivory/5 hover:border-ivory/15'
+                }`}
+              >
+                <DollarSign size={14} />
+                <span>Valor Fixo (R$)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setTipoDesconto('percentual')}
+                className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                  tipoDesconto === 'percentual'
+                    ? 'bg-gold/15 text-gold border border-gold/30'
+                    : 'bg-noir-800/50 text-ivory/40 border border-ivory/5 hover:border-ivory/15'
+                }`}
+              >
+                <Percent size={14} />
+                <span>Percentual (%)</span>
+              </button>
             </div>
-            <div>
-              <label className="block text-ivory/50 text-xs font-accent uppercase tracking-wider mb-1.5">
-                {tipoDesconto === 'fixo' ? 'Valor (R$)' : 'Percentual (%)'}
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ivory/25 text-sm">
-                  {tipoDesconto === 'fixo' ? 'R$' : '%'}
-                </span>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={valorDesconto}
-                  onChange={e => setValorDesconto(e.target.value)}
-                  placeholder={tipoDesconto === 'fixo' ? '150.00' : '20'}
-                  className={`${inputClass} pl-10`}
-                />
-              </div>
+          </div>
+
+          {/* Valor do Desconto */}
+          <div>
+            <label className="block text-ivory/50 text-[11px] sm:text-xs font-accent uppercase tracking-wider mb-1">
+              {tipoDesconto === 'fixo' ? 'Valor do Desconto (R$)' : 'Porcentagem de Desconto (%)'}
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ivory/25 text-sm font-medium">
+                {tipoDesconto === 'fixo' ? 'R$' : '%'}
+              </span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={valorDesconto}
+                onChange={e => setValorDesconto(e.target.value)}
+                placeholder={tipoDesconto === 'fixo' ? '150.00' : '20'}
+                className={`${inputClass} pl-10`}
+              />
             </div>
           </div>
 
           {/* Seleção de produtos */}
           <div>
-            <label className="block text-ivory/50 text-xs font-accent uppercase tracking-wider mb-1.5">
+            <label className="block text-ivory/50 text-[11px] sm:text-xs font-accent uppercase tracking-wider mb-1">
               Produtos na Promoção ({produtosSelecionados.length} selecionados)
             </label>
 
@@ -390,7 +390,7 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promoca
 
             {/* Lista de produtos */}
             <div
-              className="max-h-[200px] overflow-y-auto rounded-lg"
+              className="max-h-[160px] sm:max-h-[200px] overflow-y-auto rounded-lg"
               style={{ border: '0.25px solid rgba(212, 175, 55, 0.1)' }}
             >
               {loadingProdutos ? (
@@ -457,26 +457,26 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promoca
         </form>
 
         {/* Footer */}
-        <div className="p-5 pt-0">
-          <div className="flex gap-3">
+        <div className="p-4 sm:p-5 pt-2 sm:pt-0">
+          <div className="flex gap-2 sm:gap-3">
             <Button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-noir-800/50 text-ivory/50 hover:text-ivory/70"
+              className="flex-1 bg-noir-800/50 text-ivory/50 hover:text-ivory/70 text-xs sm:text-sm py-2.5 sm:py-3"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={loading}
-              className="flex-1"
+              className="flex-1 text-xs sm:text-sm py-2.5 sm:py-3"
             >
               {loading ? (
-                <Loader2 size={16} className="animate-spin mr-2" />
+                <Loader2 size={16} className="animate-spin" />
               ) : (
-                <Tag size={16} className="mr-2" />
+                <Tag size={16} className="flex-shrink-0" />
               )}
-              {promocao ? 'Salvar Alterações' : 'Criar Promoção'}
+              <span>{promocao ? 'Salvar Alterações' : 'Criar Promoção'}</span>
             </Button>
           </div>
         </div>

@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <div className="relative">
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-12 sm:pt-24 sm:pb-16">
         {/* Background escuro sólido */}
         <div className="absolute inset-0 bg-noir-950" />
         
@@ -22,30 +22,30 @@ export default function Home() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gold/5 rounded-full blur-[120px]" />
         
         {/* Content */}
-        <div className="relative z-10 text-center px-4 sm:px-6 max-w-4xl mx-auto">
+        <div className="relative z-10 text-center px-4 sm:px-6 max-w-4xl mx-auto py-4 sm:py-8">
           {/* Decoração superior */}
-          <div className="flex items-center justify-center gap-4 mb-10">
+          <div className="flex items-center justify-center gap-4 mb-6 sm:mb-8">
             <div className="w-16 h-px bg-gradient-to-r from-transparent to-gold/50" />
             <span className="text-gold/70 text-lg">✦</span>
             <div className="w-16 h-px bg-gradient-to-l from-transparent to-gold/50" />
           </div>
 
           {/* Marca */}
-          <p className="font-accent text-gold/60 text-[11px] uppercase tracking-[0.4em] mb-8">
+          <p className="font-accent text-gold/60 text-[11px] uppercase tracking-[0.4em] mb-4 sm:mb-6">
             Zahara Parfums
           </p>
 
           {/* Título principal */}
-          <h1 className="font-heading text-6xl sm:text-8xl md:text-9xl font-bold mb-8 leading-[0.9]">
+          <h1 className="font-heading text-5xl sm:text-7xl md:text-8xl font-bold mb-6 leading-[0.95]">
             <span className="text-ivory block mb-2">A Essência</span>
             <span className="text-gradient-gold block">Do Oriente</span>
           </h1>
 
           {/* Linha decorativa */}
-          <div className="w-24 h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent mx-auto mb-8" />
+          <div className="w-24 h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent mx-auto mb-6 sm:mb-8" />
 
           {/* Descrição */}
-          <p className="font-display text-ivory/50 text-lg sm:text-xl max-w-xl mx-auto mb-12 italic leading-relaxed">
+          <p className="font-display text-ivory/50 text-base sm:text-xl max-w-xl mx-auto mb-8 sm:mb-10 italic leading-relaxed">
             Fragrâncias árabes de luxo importadas direto do Oriente Médio.
             Cada gota carrega séculos de tradição em perfumaria.
           </p>
@@ -67,7 +67,7 @@ export default function Home() {
           </div>
 
           {/* Decoração inferior */}
-          <div className="flex items-center justify-center gap-4 mt-16">
+          <div className="flex items-center justify-center gap-4 mt-8 sm:mt-12">
             <div className="w-20 h-px bg-gradient-to-r from-transparent to-gold/20" />
             <span className="text-gold/30 text-xs">◆</span>
             <div className="w-20 h-px bg-gradient-to-l from-transparent to-gold/20" />
@@ -75,7 +75,7 @@ export default function Home() {
         </div>
 
         {/* Scroll indicator - mouse */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden sm:flex flex-col items-center gap-2">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 hidden sm:flex flex-col items-center gap-2">
           <div className="w-6 h-10 rounded-full border border-ivory/20 flex items-start justify-center p-1.5">
             <div className="w-1 h-2.5 bg-gold/50 rounded-full animate-scroll-wheel" />
           </div>

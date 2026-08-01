@@ -59,7 +59,7 @@ export default function AdminLayout() {
       )}
 
       {/* Main content */}
-      <main className="pt-16 lg:pt-0 lg:ml-64 p-4 sm:p-6 lg:p-8 transition-all duration-300">
+      <main className="pt-20 lg:pt-8 lg:ml-64 p-4 sm:p-6 lg:p-8 transition-all duration-300">
         <Outlet />
       </main>
     </div>

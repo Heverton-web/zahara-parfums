@@ -16,7 +16,6 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-restoration: none;
 }
 
 body {
@@ -140,11 +139,14 @@ body {
 /* Luxury button */
 .btn-luxury {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   background: var(--gold-gradient);
   color: #0d0d0d;
   font-weight: 600;
-  padding: 14px 32px;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   transition: all 0.4s ease;
 }
