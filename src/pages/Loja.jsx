@@ -51,8 +51,6 @@ export default function Loja() {
     (p.tags || []).some(t => t.toLowerCase().includes('lançamento'))
   ).length
 
-  const activeFiltersCount = Object.values(filtros).filter(Boolean).length
-
   const atalhosCategorias = [
     {
       to: '/ofertas-relampago',
@@ -60,8 +58,9 @@ export default function Loja() {
       count: countRelampago,
       Icone: Flame,
       colorText: 'text-red-400',
-      borderHover: 'hover:border-red-500/40',
-      bgBadge: 'bg-red-500/10 text-red-400 border-red-500/30',
+      bgGradient: 'bg-gradient-to-br from-red-500/15 via-red-950/30 to-noir-900',
+      borderColor: 'border-red-500/30 hover:border-red-400/60 shadow-red-500/10',
+      bgBadge: 'bg-red-500/20 text-red-400 border-red-500/40',
     },
     {
       to: '/super-promocoes',
@@ -69,8 +68,9 @@ export default function Loja() {
       count: countSuperPromo,
       Icone: Sparkles,
       colorText: 'text-gold',
-      borderHover: 'hover:border-gold/40',
-      bgBadge: 'bg-gold/10 text-gold border-gold/30',
+      bgGradient: 'bg-gradient-to-br from-gold/20 via-gold/5 to-noir-900',
+      borderColor: 'border-gold/30 hover:border-gold/60 shadow-gold/10',
+      bgBadge: 'bg-gold/20 text-gold border-gold/40',
     },
     {
       to: '/promocoes',
@@ -78,8 +78,9 @@ export default function Loja() {
       count: countPromocoes,
       Icone: Tag,
       colorText: 'text-emerald-400',
-      borderHover: 'hover:border-emerald-500/40',
-      bgBadge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+      bgGradient: 'bg-gradient-to-br from-emerald-500/15 via-emerald-950/30 to-noir-900',
+      borderColor: 'border-emerald-500/30 hover:border-emerald-400/60 shadow-emerald-500/10',
+      bgBadge: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
     },
     {
       to: '/lancamentos',
@@ -87,10 +88,13 @@ export default function Loja() {
       count: countLancamentos,
       Icone: Sparkles,
       colorText: 'text-indigo-300',
-      borderHover: 'hover:border-indigo-400/40',
-      bgBadge: 'bg-indigo-500/10 text-indigo-300 border-indigo-400/30',
+      bgGradient: 'bg-gradient-to-br from-indigo-500/15 via-indigo-950/30 to-noir-900',
+      borderColor: 'border-indigo-400/30 hover:border-indigo-300/60 shadow-indigo-500/10',
+      bgBadge: 'bg-indigo-500/20 text-indigo-300 border-indigo-400/40',
     },
   ]
+
+  const activeFiltersCount = Object.values(filtros).filter(Boolean).length
 
   return (
     <div className="min-h-screen bg-noir-950 pt-20 sm:pt-24 pb-16">
@@ -109,19 +113,19 @@ export default function Loja() {
           </p>
         </div>
 
-        {/* ── BOTÕES / CARDS DE ATALHO PARA ROTAS EXCLUSIVAS COM CONTADORES ── */}
+        {/* ── BOTÕES / CARDS DE ATALHO PARA ROTAS EXCLUSIVAS COM GRADIENTE PREMIUM ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8 sm:mb-12">
           {atalhosCategorias.map(cat => (
             <Link
               key={cat.to}
               to={cat.to}
-              className={`p-4 rounded-2xl bg-noir-900 border border-gold/15 transition-all duration-300 hover:scale-[1.02] ${cat.borderHover} group shadow-lg flex flex-col justify-between`}
+              className={`p-4 sm:p-5 rounded-2xl ${cat.bgGradient} border ${cat.borderColor} transition-all duration-500 hover:scale-[1.03] group shadow-xl flex flex-col justify-between`}
             >
               <div className="flex items-center justify-between mb-3">
-                <div className={`p-2 rounded-xl bg-noir-800 border border-ivory/5 group-hover:bg-noir-950 ${cat.colorText}`}>
+                <div className={`p-2 rounded-xl bg-noir-950/80 border border-ivory/10 group-hover:bg-noir-950 ${cat.colorText}`}>
                   <cat.Icone size={18} />
                 </div>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${cat.bgBadge}`}>
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border backdrop-blur-sm ${cat.bgBadge}`}>
                   {cat.count} {cat.count === 1 ? 'item' : 'itens'}
                 </span>
               </div>
