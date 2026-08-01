@@ -252,7 +252,7 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promoca
         </div>
 
         {/* Content */}
-        <form onSubmit={handleSubmit} className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-3.5 sm:space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-3.5 sm:space-y-4 pb-6 sm:pb-8">
           {error && (
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs sm:text-sm">
               {error}
@@ -371,7 +371,7 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promoca
           </div>
 
           {/* Seleção de produtos */}
-          <div>
+          <div className="pb-2">
             <label className="block text-ivory/50 text-[11px] sm:text-xs font-accent uppercase tracking-wider mb-1">
               Produtos na Promoção ({produtosSelecionados.length} selecionados)
             </label>
@@ -457,7 +457,7 @@ export default function BulkPromotionModal({ isOpen, onClose, onSuccess, promoca
         </form>
 
         {/* Footer */}
-        <div className="p-4 sm:p-5 pt-2 sm:pt-0">
+        <div className="p-4 sm:p-5 pt-3 border-t border-gold/10 bg-noir-950/80 backdrop-blur-sm rounded-b-2xl">
           <div className="flex gap-2 sm:gap-3">
             <Button
               type="button"

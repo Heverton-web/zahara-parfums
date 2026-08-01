@@ -13,6 +13,7 @@ import Dashboard from './pages/admin/Dashboard'
 import AdminProdutos from './pages/admin/Produtos'
 import MarcasAdmin from './pages/admin/MarcasAdmin'
 import PromocoesEmMassa from './pages/admin/PromocoesEmMassa'
+import PrecosEmMassa from './pages/admin/PrecosEmMassa'
 import Configuracoes from './pages/admin/Configuracoes'
 import AdminLayout from './components/layout/AdminLayout'
 import PromptInstalacaoPWA from './components/ui/PromptInstalacaoPWA'
@@ -55,6 +56,7 @@ function App() {
             <Route path="produtos" element={<AdminProdutos />} />
             <Route path="marcas" element={<MarcasAdmin />} />
             <Route path="promocoes" element={<PromocoesEmMassa />} />
+            <Route path="alterar-precos" element={<PrecosEmMassa />} />
             <Route path="configuracoes" element={<Configuracoes />} />
           </Route>
 

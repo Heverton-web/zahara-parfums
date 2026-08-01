@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Package, Tag, Zap, Settings, LogOut, ArrowLeft } from 'lucide-react'
+import { LayoutDashboard, Package, Tag, Zap, TrendingUp, Settings, LogOut, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 
 export default function Sidebar({ collapsed, onToggle, mobile = false, onClose }) {
@@ -11,6 +11,7 @@ export default function Sidebar({ collapsed, onToggle, mobile = false, onClose }
     { to: '/admin/produtos', icon: Package, label: 'Produtos' },
     { to: '/admin/marcas', icon: Tag, label: 'Marcas' },
     { to: '/admin/promocoes', icon: Zap, label: 'Promoções' },
+    { to: '/admin/alterar-precos', icon: TrendingUp, label: 'Alterar Preços' },
     { to: '/admin/configuracoes', icon: Settings, label: 'Configurações' },
   ]
 
