@@ -44,6 +44,25 @@ body {
   background: linear-gradient(180deg, #e8d5a3 0%, #c9a84c 100%);
 }
 
+/* Scrollbar ultra-fina de luxo para carrosséis */
+.scrollbar-luxury {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
+}
+.scrollbar-luxury::-webkit-scrollbar {
+  height: 2px;
+}
+.scrollbar-luxury::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-luxury::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.35);
+  border-radius: 9999px;
+}
+.scrollbar-luxury::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.7);
+}
+
 /* Selection */
 ::selection {
   background: rgba(201, 168, 76, 0.3);

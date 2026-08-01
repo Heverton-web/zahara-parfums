@@ -1,56 +1,79 @@
 import { Link } from 'react-router-dom'
 import { useProdutos } from '../hooks/useProdutos'
-import { Sparkles, Crown, Gem } from 'lucide-react'
-import CardProduto from '../components/product/CardProduto'
-import SuperPromocoes from '../components/product/SuperPromocoes'
-import Promocoes from '../components/product/Promocoes'
+import { Sparkles, Crown, Gem, Flame, Tag } from 'lucide-react'
+import SecaoCarrosselProduto from '../components/product/SecaoCarrosselProduto'
 
 export default function Home() {
-  const { produtos } = useProdutos({ ativo: true })
+  const { produtos, loading } = useProdutos({ ativo: true })
+
+  // 1. Ofertas Relâmpago
+  const ofertasRelampago = produtos.filter(p =>
+    (p.tags || []).some(t => t.toLowerCase() === 'oferta relâmpago') ||
+    (p.em_promocao_em_massa && p.promocoes_em_massa?.tag?.toLowerCase().includes('relâmpago'))
+  )
+
+  // 2. Super Promoções
+  const superPromocoes = produtos.filter(p =>
+    !ofertasRelampago.some(rel => rel.id === p.id) &&
+    ((p.tags || []).some(t => t.toLowerCase() === 'super promoção') ||
+    (p.em_promocao_em_massa && p.promocoes_em_massa?.tag?.toLowerCase().includes('super')))
+  )
+
+  // 3. Promoções Padrão
+  const promocoes = produtos.filter(p =>
+    !ofertasRelampago.some(rel => rel.id === p.id) &&
+    !superPromocoes.some(sup => sup.id === p.id) &&
+    ((p.tags || []).some(t => t.toLowerCase() === 'promoção') ||
+    (p.em_promocao_em_massa && p.promocoes_em_massa?.tag?.toLowerCase() === 'promoção'))
+  )
+
+  // 4. Lançamentos
+  const lancamentos = produtos.filter(p =>
+    !ofertasRelampago.some(rel => rel.id === p.id) &&
+    !superPromocoes.some(sup => sup.id === p.id) &&
+    !promocoes.some(pro => pro.id === p.id) &&
+    (p.tags || []).some(t => t.toLowerCase() === 'lançamento')
+  )
+
+  // 5. Convencionais (Exibidos sob o título elegante "Fragrâncias Exclusivas")
+  const convencionais = produtos.filter(p =>
+    !ofertasRelampago.some(rel => rel.id === p.id) &&
+    !superPromocoes.some(sup => sup.id === p.id) &&
+    !promocoes.some(pro => pro.id === p.id) &&
+    !lancamentos.some(lan => lan.id === p.id)
+  )
 
   return (
     <div className="relative">
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-12 sm:pt-24 sm:pb-16">
-        {/* Background escuro sólido */}
         <div className="absolute inset-0 bg-noir-950" />
-        
-        {/* Pattern sutil */}
         <div className="absolute inset-0 bg-pattern-arabic opacity-10" />
-        
-        {/* Gradiente dourado sutil no topo */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gold/5 rounded-full blur-[120px]" />
         
-        {/* Content */}
         <div className="relative z-10 text-center px-4 sm:px-6 max-w-4xl mx-auto py-4 sm:py-8">
-          {/* Decoração superior */}
           <div className="flex items-center justify-center gap-4 mb-6 sm:mb-8">
             <div className="w-16 h-px bg-gradient-to-r from-transparent to-gold/50" />
             <span className="text-gold/70 text-lg">✦</span>
             <div className="w-16 h-px bg-gradient-to-l from-transparent to-gold/50" />
           </div>
 
-          {/* Marca */}
           <p className="font-accent text-gold/60 text-[11px] uppercase tracking-[0.4em] mb-4 sm:mb-6">
             Zahara Parfums
           </p>
 
-          {/* Título principal */}
           <h1 className="font-heading text-5xl sm:text-7xl md:text-8xl font-bold mb-6 leading-[0.95]">
             <span className="text-ivory block mb-2">A Essência</span>
             <span className="text-gradient-gold block">Do Oriente</span>
           </h1>
 
-          {/* Linha decorativa */}
           <div className="w-24 h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent mx-auto mb-6 sm:mb-8" />
 
-          {/* Descrição */}
           <p className="font-display text-ivory/50 text-base sm:text-xl max-w-xl mx-auto mb-8 sm:mb-10 italic leading-relaxed">
             Fragrâncias árabes de luxo importadas direto do Oriente Médio.
             Cada gota carrega séculos de tradição em perfumaria.
           </p>
 
-          {/* Botões */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link 
               to="/loja" 
@@ -66,7 +89,6 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Decoração inferior */}
           <div className="flex items-center justify-center gap-4 mt-8 sm:mt-12">
             <div className="w-20 h-px bg-gradient-to-r from-transparent to-gold/20" />
             <span className="text-gold/30 text-xs">◆</span>
@@ -74,7 +96,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Scroll indicator - mouse */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 hidden sm:flex flex-col items-center gap-2">
           <div className="w-6 h-10 rounded-full border border-ivory/20 flex items-start justify-center p-1.5">
             <div className="w-1 h-2.5 bg-gold/50 rounded-full animate-scroll-wheel" />
@@ -83,10 +104,9 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 sm:py-28 bg-noir-950 relative">
+      <section className="py-16 sm:py-24 bg-noir-950 relative border-b border-ivory/5">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12">
-            {/* Feature 1 */}
             <div className="text-center group">
               <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-gold/10 to-gold/5 flex items-center justify-center border border-gold/10 group-hover:border-gold/30 transition-all duration-500">
                 <Sparkles className="text-gold/70" size={24} />
@@ -99,7 +119,6 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Feature 2 */}
             <div className="text-center group">
               <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-gold/10 to-gold/5 flex items-center justify-center border border-gold/10 group-hover:border-gold/30 transition-all duration-500">
                 <Crown className="text-gold/70" size={24} />
@@ -112,7 +131,6 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Feature 3 */}
             <div className="text-center group">
               <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-gold/10 to-gold/5 flex items-center justify-center border border-gold/10 group-hover:border-gold/30 transition-all duration-500">
                 <Gem className="text-gold/70" size={24} />
@@ -128,71 +146,65 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Destaques Section */}
-      <section className="py-20 sm:py-28 bg-noir-950 relative">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          {/* Header da seção */}
-          <div className="text-center mb-12">
-            <p className="text-gold/50 text-xs uppercase tracking-[0.2em] mb-3 font-medium">
-              Descubra
-            </p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-ivory mb-4">
-              Destaques da Semana
-            </h2>
-            <div className="w-12 h-px bg-gold/30 mx-auto" />
-          </div>
+      {/* ── 5 SEÇÕES HORIZONTAIS DE PRODUTOS ── */}
 
-          {/* Grid de produtos - exclui promo e super promo */}
-          {(() => {
-            const destaque = produtos.filter(p =>
-              !p.em_promocao_em_massa &&
-              !p.tags?.includes('promoção') &&
-              !p.tags?.includes('oferta relâmpago')
-            ).slice(0, 3)
-            return destaque.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {destaque.map((produto, index) => (
-                <div
-                  key={produto.id}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <CardProduto produto={produto} />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16">
-              <Gem className="text-gold/20 mx-auto mb-4" size={48} />
-              <p className="text-ivory/40 italic">
-                Nenhum produto em destaque ainda.
-              </p>
-            </div>
-            )
-          })()}
+      {/* 1. Ofertas Relâmpago (Carmesim & Fogo) */}
+      <SecaoCarrosselProduto
+        titulo="Ofertas Relâmpago"
+        subtitulo="Preços expressos com temporizador de contagem regressiva"
+        badgeText="Oferta Relâmpago"
+        Icone={Flame}
+        variante="carmesim"
+        produtos={ofertasRelampago}
+        loading={loading}
+      />
 
-          {/* Botão ver todos */}
-          <div className="text-center mt-12">
-            <Link
-              to="/loja"
-              className="inline-flex items-center gap-2 px-6 py-3 border border-gold/30 text-gold rounded-xl hover:bg-gold/10 transition-all duration-300"
-            >
-              <span>Ver Toda Coleção</span>
-              <span>→</span>
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* 2. Super Promoções (Ouro Âmbar & Vinho) */}
+      <SecaoCarrosselProduto
+        titulo="Super Promoções"
+        subtitulo="Nossos descontos mais expressivos selecionados a dedo"
+        badgeText="Super Promoção"
+        Icone={Sparkles}
+        variante="ouro"
+        produtos={superPromocoes}
+        loading={loading}
+      />
 
-      {/* Super Promoções */}
-      <SuperPromocoes />
+      {/* 3. Promoções (Verde Esmeralda Imperial) */}
+      <SecaoCarrosselProduto
+        titulo="Promoções"
+        subtitulo="Oportunidades especiais de perfumaria fina"
+        badgeText="Promoções"
+        Icone={Tag}
+        variante="esmeralda"
+        produtos={promocoes}
+        loading={loading}
+      />
 
-      {/* Promoções */}
-      <Promocoes />
+      {/* 4. Lançamentos (Azul Safira Nuit) */}
+      <SecaoCarrosselProduto
+        titulo="Lançamentos"
+        subtitulo="As novidades mais desejadas direto do Oriente"
+        badgeText="Lançamento"
+        Icone={Sparkles}
+        variante="safira"
+        produtos={lancamentos}
+        loading={loading}
+      />
+
+      {/* 5. Convencionais (Fragrâncias Exclusivas / Noir Clássico Zahara) */}
+      <SecaoCarrosselProduto
+        titulo="Fragrâncias Exclusivas"
+        subtitulo="Nossa coleção clássica de perfumes refinados"
+        badgeText="Coleção Clássica"
+        Icone={Crown}
+        variante="noir"
+        produtos={convencionais}
+        loading={loading}
+      />
 
       {/* Brand Banner */}
       <section className="py-20 sm:py-28 bg-noir-950 relative overflow-hidden">
-        {/* Background decorativo */}
         <div className="absolute inset-0 bg-gradient-to-r from-noir-950 via-noir-900/50 to-noir-950" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-gold/5 rounded-full blur-[100px]" />
         

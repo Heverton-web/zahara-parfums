@@ -188,13 +188,13 @@ export default function PromocoesEmMassa() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-ivory mb-2">
-            Promoções em Massa
+            Super Promoções
           </h1>
           <div className="w-8 sm:w-12 h-px bg-gradient-to-r from-gold/40 sm:from-gold/50 to-transparent" />
         </div>
         <Button onClick={handleNew} className="w-full sm:w-auto text-sm">
           <Plus size={16} />
-          <span>Nova Promoção</span>
+          <span>Nova Super Promoção</span>
         </Button>
       </div>
 

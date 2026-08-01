@@ -15,14 +15,17 @@ export default function Promocoes() {
     try {
       const { data, error } = await supabase
         .from('produtos')
-        .select('*, marcas(id, nome, logo_url)')
+        .select('*, marcas(id, nome, logo_url), promocoes_em_massa(id, nome, data_fim, tag)')
         .eq('ativo', true)
-        .or('tags.cs.{promoção},tags.cs.{oferta relâmpago}')
 
       if (error) throw error
 
-      // Excluir produtos que estão em promoção em massa
-      const filtrados = (data || []).filter(p => !p.em_promocao_em_massa)
+      const now = new Date()
+      const filtrados = (data || []).filter(p => {
+        const temTagPromo = (p.tags || []).some(t => t.toLowerCase() === 'promoção')
+        const promoAtiva = p.em_promocao_em_massa && p.promocoes_em_massa?.data_fim && new Date(p.promocoes_em_massa.data_fim) > now && p.promocoes_em_massa?.tag?.toLowerCase() === 'promoção'
+        return temTagPromo || promoAtiva
+      })
 
       setProdutos(filtrados)
     } catch (err) {
