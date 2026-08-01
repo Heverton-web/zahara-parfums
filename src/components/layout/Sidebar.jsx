@@ -12,6 +12,7 @@ export default function Sidebar({ collapsed, onToggle, mobile = false, onClose }
     { to: '/admin/marcas', icon: Tag, label: 'Marcas' },
     { to: '/admin/promocoes', icon: Zap, label: 'Promoções' },
     { to: '/admin/alterar-precos', icon: TrendingUp, label: 'Alterar Preços' },
+    { to: '/admin/tags', icon: Tag, label: 'Gerenciar Tags' },
     { to: '/admin/configuracoes', icon: Settings, label: 'Configurações' },
   ]
 

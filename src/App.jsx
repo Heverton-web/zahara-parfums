@@ -14,6 +14,7 @@ import AdminProdutos from './pages/admin/Produtos'
 import MarcasAdmin from './pages/admin/MarcasAdmin'
 import PromocoesEmMassa from './pages/admin/PromocoesEmMassa'
 import PrecosEmMassa from './pages/admin/PrecosEmMassa'
+import GerenciarTags from './pages/admin/GerenciarTags'
 import Configuracoes from './pages/admin/Configuracoes'
 import AdminLayout from './components/layout/AdminLayout'
 import PromptInstalacaoPWA from './components/ui/PromptInstalacaoPWA'
@@ -57,6 +58,7 @@ function App() {
             <Route path="marcas" element={<MarcasAdmin />} />
             <Route path="promocoes" element={<PromocoesEmMassa />} />
             <Route path="alterar-precos" element={<PrecosEmMassa />} />
+            <Route path="tags" element={<GerenciarTags />} />
             <Route path="configuracoes" element={<Configuracoes />} />
           </Route>
 
