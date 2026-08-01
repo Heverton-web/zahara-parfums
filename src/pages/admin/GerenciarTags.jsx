@@ -1,22 +1,16 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
-import { Tag as TagIcon, Search, Loader2, Check, RefreshCw, AlertCircle, Plus, X, Filter } from 'lucide-react'
+import { Tag as TagIcon, Search, Loader2, Check, RefreshCw, AlertCircle, X, Filter, Trash2 } from 'lucide-react'
 import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import { produtosMock } from '../../data/mock'
 
-const tagColors = {
-  'lançamento': 'gold',
-  'promoção': 'wine',
-  'oferta relâmpago': 'danger',
-  'SUPER PROMOÇÃO': 'danger',
-}
-
-const tagsSugeridasPadrao = [
-  'lançamento',
-  'promoção',
-  'oferta relâmpago',
-  'SUPER PROMOÇÃO',
+// As 4 tags oficiais e exclusivas suportadas pela loja (cada produto pode ter NO MÁXIMO 1)
+const TAGS_OFICIAIS = [
+  'Oferta Relâmpago',
+  'Super Promoção',
+  'Promoção',
+  'Lançamentos',
 ]
 
 export default function GerenciarTags() {
@@ -24,17 +18,12 @@ export default function GerenciarTags() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [busca, setBusca] = useState('')
-  const [tagFiltro, setTagFiltro] = useState(null) // Tag ativa para filtragem
+  const [tagFiltro, setTagFiltro] = useState(null)
   const [selecionados, setSelecionados] = useState([])
 
-  // Formulário em massa
-  const [acaoMassa, setAcaoMassa] = useState('adicionar') // 'adicionar' | 'remover' | 'substituir'
-  const [tagsParaAplicar, setTagsParaAplicar] = useState([])
-  const [novaTagFormInput, setNovaTagFormInput] = useState('')
-
-  // Tag rápida em produto único
-  const [produtoEditandoId, setProdutoEditandoId] = useState(null)
-  const [novaTagUnicaInput, setNovaTagUnicaInput] = useState('')
+  // Formulário em massa: escolha de 1 única tag por vez ou remoção
+  const [tagEmMassa, setTagEmMassa] = useState('') // Tag escolhida para aplicar
+  const [acaoMassa, setAcaoMassa] = useState('definir') // 'definir' | 'remover'
 
   const [mensagemSucesso, setMensagemSucesso] = useState('')
   const [erro, setErro] = useState('')
@@ -69,32 +58,35 @@ export default function GerenciarTags() {
     setLoading(false)
   }
 
-  // Contagem de produtos por tag
+  // Contagem exata por cada uma das 4 tags oficiais (cada produto conta no máximo em 1)
   const contagemPorTag = {}
-  tagsSugeridasPadrao.forEach(t => { contagemPorTag[t] = 0 })
+  TAGS_OFICIAIS.forEach(t => { contagemPorTag[t] = 0 })
+
   produtos.forEach(p => {
-    (p.tags || []).forEach(t => {
-      contagemPorTag[t] = (contagemPorTag[t] || 0) + 1
-    })
+    const primeiraTag = (p.tags || [])[0]
+    if (primeiraTag) {
+      const tagMatch = TAGS_OFICIAIS.find(oficial => oficial.toLowerCase() === primeiraTag.toLowerCase())
+      if (tagMatch) {
+        contagemPorTag[tagMatch] = (contagemPorTag[tagMatch] || 0) + 1
+      }
+    }
   })
 
-  const todasAsTagsExistentes = Array.from(
-    new Set([...tagsSugeridasPadrao, ...Object.keys(contagemPorTag)])
-  )
-
-  // Filtragem dos produtos
+  // Filtragem dos produtos por busca ou tag selecionada
   const produtosFiltrados = produtos.filter(p => {
     const combinaBusca =
       p.nome.toLowerCase().includes(busca.toLowerCase()) ||
       (p.marcas?.nome && p.marcas.nome.toLowerCase().includes(busca.toLowerCase())) ||
       (p.tags && p.tags.some(t => t.toLowerCase().includes(busca.toLowerCase())))
 
-    const combinaTag = tagFiltro ? (p.tags || []).includes(tagFiltro) : true
+    const combinaTag = tagFiltro
+      ? (p.tags || []).some(t => t.toLowerCase() === tagFiltro.toLowerCase())
+      : true
 
     return combinaBusca && combinaTag
   })
 
-  // Checkbox de seleção
+  // Checkbox de seleção em massa
   function toggleSelecionar(id) {
     setSelecionados(prev =>
       prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
@@ -112,23 +104,45 @@ export default function GerenciarTags() {
     }
   }
 
-  // Toggle de tags no form em massa
-  function toggleTagNoForm(tag) {
-    setTagsParaAplicar(prev =>
-      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
-    )
-  }
+  // Define EXATAMENTE 1 tag em 1 produto (ou remove se clicar na que já estava ativa)
+  async function toggleTagProdutoUnico(produto, tagOficial) {
+    setMensagemSucesso('')
+    setErro('')
 
-  function handleAddTagCustomForm(e) {
-    e.preventDefault()
-    const val = novaTagFormInput.trim()
-    if (val && !tagsParaAplicar.includes(val)) {
-      setTagsParaAplicar(prev => [...prev, val])
-      setNovaTagFormInput('')
+    const tagAtual = (produto.tags || [])[0]
+    const jaPossui = tagAtual && tagAtual.toLowerCase() === tagOficial.toLowerCase()
+
+    // Regra: No máximo 1 tag por produto!
+    const novasTags = jaPossui ? [] : [tagOficial]
+
+    try {
+      const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_URL !== 'sua_url_aqui'
+
+      if (isSupabaseConfigured) {
+        const { error } = await supabase
+          .from('produtos')
+          .update({ tags: novasTags })
+          .eq('id', produto.id)
+
+        if (error) throw error
+      }
+
+      setProdutos(prev =>
+        prev.map(p => (p.id === produto.id ? { ...p, tags: novasTags } : p))
+      )
+
+      setMensagemSucesso(
+        jaPossui
+          ? `Tag "${tagOficial}" removida de ${produto.nome}`
+          : `Tag de ${produto.nome} alterada para "${tagOficial}"`
+      )
+    } catch (err) {
+      console.error('Erro ao atualizar tag do produto:', err)
+      setErro('Erro ao salvar alteração no banco de dados.')
     }
   }
 
-  // Persistir ação de tags em massa
+  // Persistir a única tag selecionada em massa para todos os produtos marcados
   async function handleSalvarEmMassa(e) {
     e.preventDefault()
     setMensagemSucesso('')
@@ -139,8 +153,8 @@ export default function GerenciarTags() {
       return
     }
 
-    if (tagsParaAplicar.length === 0 && acaoMassa !== 'substituir') {
-      setErro('Selecione pelo menos uma tag para aplicar.')
+    if (acaoMassa === 'definir' && !tagEmMassa) {
+      setErro('Selecione a tag oficial que deseja aplicar nos produtos.')
       return
     }
 
@@ -148,44 +162,29 @@ export default function GerenciarTags() {
 
     try {
       const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_URL !== 'sua_url_aqui'
-
-      const atualizacoes = produtos
-        .filter(p => selecionados.includes(p.id))
-        .map(produto => {
-          const tagsAtuais = produto.tags || []
-          let novasTags = [...tagsAtuais]
-
-          if (acaoMassa === 'adicionar') {
-            novasTags = Array.from(new Set([...tagsAtuais, ...tagsParaAplicar]))
-          } else if (acaoMassa === 'remover') {
-            novasTags = tagsAtuais.filter(t => !tagsParaAplicar.includes(t))
-          } else if (acaoMassa === 'substituir') {
-            novasTags = [...tagsParaAplicar]
-          }
-
-          return { id: produto.id, tags: novasTags }
-        })
+      const novasTagsParaTodos = acaoMassa === 'definir' ? [tagEmMassa] : []
 
       if (isSupabaseConfigured) {
-        for (const item of atualizacoes) {
+        for (const id of selecionados) {
           const { error } = await supabase
             .from('produtos')
-            .update({ tags: item.tags })
-            .eq('id', item.id)
+            .update({ tags: novasTagsParaTodos })
+            .eq('id', id)
 
           if (error) throw error
         }
       } else {
         setProdutos(prev =>
-          prev.map(p => {
-            const mod = atualizacoes.find(u => u.id === p.id)
-            return mod ? { ...p, tags: mod.tags } : p
-          })
+          prev.map(p => (selecionados.includes(p.id) ? { ...p, tags: novasTagsParaTodos } : p))
         )
       }
 
-      setMensagemSucesso(`Tags de ${atualizacoes.length} produto(s) atualizadas com sucesso!`)
-      setTagsParaAplicar([])
+      setMensagemSucesso(
+        acaoMassa === 'definir'
+          ? `Tag "${tagEmMassa}" aplicada com sucesso a ${selecionados.length} produto(s)!`
+          : `Tags de ${selecionados.length} produto(s) removidas com sucesso!`
+      )
+      setTagEmMassa('')
       await fetchProdutos()
     } catch (err) {
       console.error('Erro ao atualizar tags em massa:', err)
@@ -193,64 +192,6 @@ export default function GerenciarTags() {
     }
 
     setSaving(false)
-  }
-
-  // Alterar tag em produto único (Remover tag individual)
-  async function handleRemoverTagUnica(produto, tagParaRemover) {
-    setMensagemSucesso('')
-    setErro('')
-    try {
-      const novasTags = (produto.tags || []).filter(t => t !== tagParaRemover)
-      const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_URL !== 'sua_url_aqui'
-
-      if (isSupabaseConfigured) {
-        const { error } = await supabase
-          .from('produtos')
-          .update({ tags: novasTags })
-          .eq('id', produto.id)
-        if (error) throw error
-      }
-
-      setProdutos(prev =>
-        prev.map(p => (p.id === produto.id ? { ...p, tags: novasTags } : p))
-      )
-      setMensagemSucesso(`Tag "${tagParaRemover}" removida de ${produto.nome}`)
-    } catch (err) {
-      console.error('Erro ao remover tag:', err)
-      setErro('Erro ao remover tag do produto.')
-    }
-  }
-
-  // Alterar tag em produto único (Adicionar tag individual)
-  async function handleAdicionarTagUnica(produto) {
-    const val = novaTagUnicaInput.trim()
-    if (!val) return
-
-    setMensagemSucesso('')
-    setErro('')
-
-    try {
-      const novasTags = Array.from(new Set([...(produto.tags || []), val]))
-      const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_URL !== 'sua_url_aqui'
-
-      if (isSupabaseConfigured) {
-        const { error } = await supabase
-          .from('produtos')
-          .update({ tags: novasTags })
-          .eq('id', produto.id)
-        if (error) throw error
-      }
-
-      setProdutos(prev =>
-        prev.map(p => (p.id === produto.id ? { ...p, tags: novasTags } : p))
-      )
-      setMensagemSucesso(`Tag "${val}" adicionada a ${produto.nome}`)
-      setProdutoEditandoId(null)
-      setNovaTagUnicaInput('')
-    } catch (err) {
-      console.error('Erro ao adicionar tag:', err)
-      setErro('Erro ao adicionar tag no produto.')
-    }
   }
 
   const todosVisiveisSelecionados = produtosFiltrados.length > 0 && produtosFiltrados.every(p => selecionados.includes(p.id))
@@ -261,12 +202,15 @@ export default function GerenciarTags() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-ivory mb-2">
-            Gerenciamento de Tags de Produtos
+            Gerenciamento de Tags dos Produtos
           </h1>
-          <div className="w-8 sm:w-12 h-px bg-gradient-to-r from-gold/40 sm:from-gold/50 to-transparent" />
+          <p className="text-ivory/50 text-xs sm:text-sm">
+            Cada produto possui <strong className="text-gold">no máximo 1 tag oficial</strong> para definir a sua seção na loja.
+          </p>
+          <div className="w-8 sm:w-12 h-px bg-gradient-to-r from-gold/40 sm:from-gold/50 to-transparent mt-2" />
         </div>
         <Badge variant="gold" className="px-3 py-1.5 text-xs font-semibold">
-          {selecionados.length} selecionado(s)
+          {selecionados.length} produto(s) selecionado(s)
         </Badge>
       </div>
 
@@ -291,12 +235,12 @@ export default function GerenciarTags() {
         </div>
       )}
 
-      {/* Painel de Métricas e Filtros Por Tag */}
+      {/* Métricas e Filtros pelas 4 Tags Oficiais */}
       <div className="bg-noir-900 rounded-2xl p-4 sm:p-6 mb-8 border border-gold/15 shadow-xl">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-base font-semibold text-ivory flex items-center gap-2">
             <Filter className="text-gold" size={18} />
-            Métricas e Filtros Por Tag
+            Produtos por Tag Oficial
           </h2>
           {tagFiltro && (
             <button
@@ -309,10 +253,10 @@ export default function GerenciarTags() {
           )}
         </div>
 
-        <div className="flex flex-wrap gap-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
           <button
             onClick={() => setTagFiltro(null)}
-            className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 ${
+            className={`p-3 rounded-xl text-xs font-semibold transition-all flex flex-col items-center justify-center gap-1 text-center ${
               tagFiltro === null
                 ? 'bg-gold text-noir-950 shadow-md shadow-gold/20'
                 : 'bg-noir-800 text-ivory/60 hover:text-ivory border border-ivory/10'
@@ -324,14 +268,14 @@ export default function GerenciarTags() {
             </span>
           </button>
 
-          {todasAsTagsExistentes.map(tag => {
+          {TAGS_OFICIAIS.map(tag => {
             const count = contagemPorTag[tag] || 0
             const ativo = tagFiltro === tag
             return (
               <button
                 key={tag}
                 onClick={() => setTagFiltro(ativo ? null : tag)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-2 ${
+                className={`p-3 rounded-xl text-xs font-semibold transition-all flex flex-col items-center justify-center gap-1 text-center ${
                   ativo
                     ? 'bg-gold text-noir-950 shadow-md shadow-gold/20'
                     : 'bg-noir-800/80 text-ivory/70 hover:text-ivory border border-ivory/10'
@@ -339,7 +283,7 @@ export default function GerenciarTags() {
               >
                 <span>{tag}</span>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] ${ativo ? 'bg-noir-950 text-gold' : 'bg-noir-900/80 text-gold/70'}`}>
-                  {count}
+                  {count} produtos
                 </span>
               </button>
             )
@@ -347,102 +291,83 @@ export default function GerenciarTags() {
         </div>
       </div>
 
-      {/* Painel de Ações em Massa de Tags */}
-      <form onSubmit={handleSalvarEmMassa} className="bg-noir-900 rounded-2xl p-4 sm:p-6 mb-8 border border-gold/15 shadow-xl">
-        <h2 className="text-base font-semibold text-ivory mb-4 flex items-center gap-2">
+      {/* Painel de Aplicação de Tag em Massa */}
+      <form onSubmit={handleSalvarEmMassa} className="bg-noir-900 rounded-2xl p-4 sm:p-6 mb-8 border border-gold/15 shadow-xl space-y-4">
+        <h2 className="text-base font-semibold text-ivory flex items-center gap-2">
           <TagIcon className="text-gold" size={18} />
-          Modificar Tags dos Produtos Selecionados ({selecionados.length})
+          Definir Tag em Massa ({selecionados.length} selecionados)
         </h2>
 
-        <div className="space-y-4">
-          {/* Ação */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* 1. Escolha da Ação */}
           <div>
             <label className="block text-ivory/50 text-[11px] font-accent uppercase tracking-wider mb-2">
-              Escolha a Ação
+              Ação desejada
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {[
-                { id: 'adicionar', label: 'Ativar / Adicionar Tags' },
-                { id: 'remover', label: 'Inativar / Remover Tags' },
-                { id: 'substituir', label: 'Substituir Todas as Tags' },
-              ].map(item => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setAcaoMassa(item.id)}
-                  className={`py-2.5 px-3 rounded-xl text-xs font-semibold transition-all ${
-                    acaoMassa === item.id
-                      ? 'bg-gold/15 text-gold border border-gold/30'
-                      : 'bg-noir-800/60 text-ivory/40 border border-ivory/5 hover:border-ivory/15'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Seletor de Tags */}
-          <div>
-            <label className="block text-ivory/50 text-[11px] font-accent uppercase tracking-wider mb-2">
-              Tags a Aplicar
-            </label>
-            <div className="flex flex-wrap gap-2 mb-3">
-              {tagsSugeridasPadrao.map(tag => {
-                const ativa = tagsParaAplicar.includes(tag)
-                return (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => toggleTagNoForm(tag)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-1.5 ${
-                      ativa
-                        ? 'bg-gold text-noir-950 shadow-md shadow-gold/20 scale-105'
-                        : 'bg-noir-800 text-ivory/60 hover:text-ivory border border-ivory/10'
-                    }`}
-                  >
-                    {ativa && <Check size={12} />}
-                    <span>{tag}</span>
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Input Tag Customizada */}
-            <div className="flex gap-2 max-w-md">
-              <input
-                type="text"
-                placeholder="Digitar tag personalizada..."
-                value={novaTagFormInput}
-                onChange={e => setNovaTagFormInput(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-xl text-xs text-ivory bg-noir-800/60 border border-ivory/10 focus:border-gold/40 focus:outline-none"
-              />
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={handleAddTagCustomForm}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-gold/15 text-gold border border-gold/30 hover:bg-gold/25 transition-all flex items-center gap-1"
+                onClick={() => setAcaoMassa('definir')}
+                className={`py-2.5 px-3 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                  acaoMassa === 'definir'
+                    ? 'bg-gold/15 text-gold border border-gold/30'
+                    : 'bg-noir-800/60 text-ivory/40 border border-ivory/5 hover:border-ivory/15'
+                }`}
               >
-                <Plus size={14} />
-                Adicionar Tag
+                <TagIcon size={14} />
+                <span>Definir Tag</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setAcaoMassa('remover')}
+                className={`py-2.5 px-3 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                  acaoMassa === 'remover'
+                    ? 'bg-wine/20 text-wine-light border border-wine/40'
+                    : 'bg-noir-800/60 text-ivory/40 border border-ivory/5 hover:border-ivory/15'
+                }`}
+              >
+                <Trash2 size={14} />
+                <span>Remover Tag</span>
               </button>
             </div>
           </div>
 
-          {/* Botão de Salvar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-ivory/5">
-            <p className="text-ivory/40 text-xs italic text-center sm:text-left">
-              * A alteração de tags será persistida imediatamente no banco de dados para os produtos marcados.
-            </p>
+          {/* 2. Seleção Única da Tag Oficial */}
+          {acaoMassa === 'definir' && (
+            <div>
+              <label className="block text-ivory/50 text-[11px] font-accent uppercase tracking-wider mb-2">
+                Selecione a Tag Única Oficial
+              </label>
+              <select
+                value={tagEmMassa}
+                onChange={e => setTagEmMassa(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl text-xs sm:text-sm text-ivory bg-noir-800/60 border border-ivory/10 focus:border-gold/40 focus:outline-none"
+              >
+                <option value="">-- Escolha a tag oficial --</option>
+                {TAGS_OFICIAIS.map(tag => (
+                  <option key={tag} value={tag}>
+                    {tag}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
 
-            <Button
-              type="submit"
-              disabled={saving || selecionados.length === 0 || (tagsParaAplicar.length === 0 && acaoMassa !== 'substituir')}
-              className="w-full sm:w-auto text-sm px-8 py-3"
-            >
-              {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
-              <span>Aplicar Tags em ({selecionados.length})</span>
-            </Button>
-          </div>
+        {/* Botão de Salvar em Massa */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-ivory/5">
+          <p className="text-ivory/40 text-xs italic text-center sm:text-left">
+            * A tag anterior dos produtos selecionados será substituída pela nova tag escolhida.
+          </p>
+
+          <Button
+            type="submit"
+            disabled={saving || selecionados.length === 0 || (acaoMassa === 'definir' && !tagEmMassa)}
+            className="w-full sm:w-auto text-sm px-8 py-3"
+          >
+            {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+            <span>Aplicar nos Produtos ({selecionados.length})</span>
+          </Button>
         </div>
       </form>
 
@@ -452,7 +377,7 @@ export default function GerenciarTags() {
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ivory/30" />
           <input
             type="text"
-            placeholder="Buscar por nome, marca ou tag..."
+            placeholder="Buscar por produto ou marca..."
             value={busca}
             onChange={e => setBusca(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl text-xs sm:text-sm text-ivory bg-noir-900 border border-gold/15 focus:border-gold/40 focus:outline-none"
@@ -469,7 +394,7 @@ export default function GerenciarTags() {
         </button>
       </div>
 
-      {/* Tabela Desktop */}
+      {/* Tabela Desktop (Escolha Única Mutuamente Exclusiva) */}
       <div className="hidden md:block bg-noir-900 rounded-2xl overflow-hidden border border-gold/15 shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -484,28 +409,27 @@ export default function GerenciarTags() {
                   />
                 </th>
                 <th className="p-3 sm:p-4">Produto</th>
-                <th className="p-3 sm:p-4">Tags Ativas (Clique X para remover)</th>
-                <th className="p-3 sm:p-4 text-right">Ação Rápida (Produto Único)</th>
+                <th className="p-3 sm:p-4 text-center">Tag Oficial Ativa (Apenas 1 por produto)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gold/10 text-xs sm:text-sm">
               {loading ? (
                 <tr>
-                  <td colSpan="4" className="p-8 text-center">
+                  <td colSpan="3" className="p-8 text-center">
                     <Loader2 size={24} className="animate-spin text-gold/50 mx-auto mb-2" />
                     <p className="text-ivory/40 italic">Carregando produtos...</p>
                   </td>
                 </tr>
               ) : produtosFiltrados.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="p-8 text-center text-ivory/30 italic">
+                  <td colSpan="3" className="p-8 text-center text-ivory/30 italic">
                     Nenhum produto encontrado com este filtro.
                   </td>
                 </tr>
               ) : (
                 produtosFiltrados.map(produto => {
                   const estaSelecionado = selecionados.includes(produto.id)
-                  const editandoEstaLinha = produtoEditandoId === produto.id
+                  const tagAtual = (produto.tags || [])[0]
 
                   return (
                     <tr
@@ -533,68 +457,28 @@ export default function GerenciarTags() {
                         )}
                       </td>
 
-                      {/* Lista de Tags com X para remover */}
-                      <td className="p-3 sm:p-4" onClick={e => e.stopPropagation()}>
-                        <div className="flex flex-wrap gap-1.5 items-center">
-                          {(produto.tags || []).length > 0 ? (
-                            produto.tags.map(tag => (
-                              <span
-                                key={tag}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gold/15 text-gold border border-gold/30"
+                      {/* Escolha da Única Tag Oficial em Modo Exclusivo */}
+                      <td className="p-3 sm:p-4 text-center" onClick={e => e.stopPropagation()}>
+                        <div className="flex flex-wrap items-center justify-center gap-1.5">
+                          {TAGS_OFICIAIS.map(tagOficial => {
+                            const ativa = tagAtual && tagAtual.toLowerCase() === tagOficial.toLowerCase()
+                            return (
+                              <button
+                                key={tagOficial}
+                                type="button"
+                                onClick={() => toggleTagProdutoUnico(produto, tagOficial)}
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                                  ativa
+                                    ? 'bg-gold text-noir-950 shadow-md shadow-gold/20 scale-105 ring-2 ring-gold/40'
+                                    : 'bg-noir-800/60 text-ivory/30 hover:text-ivory/80 border border-ivory/5'
+                                }`}
                               >
-                                <span>{tag}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoverTagUnica(produto, tag)}
-                                  className="text-gold/60 hover:text-red-400 transition-colors"
-                                  title={`Remover tag ${tag}`}
-                                >
-                                  <X size={12} />
-                                </button>
-                              </span>
-                            ))
-                          ) : (
-                            <span className="text-ivory/25 text-xs italic">Sem tags ativas</span>
-                          )}
+                                {ativa && <Check size={12} />}
+                                <span>{tagOficial}</span>
+                              </button>
+                            )
+                          })}
                         </div>
-                      </td>
-
-                      {/* Adicionar Tag Rápida */}
-                      <td className="p-3 sm:p-4 text-right" onClick={e => e.stopPropagation()}>
-                        {editandoEstaLinha ? (
-                          <div className="flex items-center justify-end gap-1.5">
-                            <input
-                              type="text"
-                              placeholder="Nome da tag..."
-                              value={novaTagUnicaInput}
-                              onChange={e => setNovaTagUnicaInput(e.target.value)}
-                              className="px-2.5 py-1 rounded-lg text-xs text-ivory bg-noir-800 border border-gold/30 focus:outline-none"
-                              autoFocus
-                              onKeyDown={e => { if (e.key === 'Enter') handleAdicionarTagUnica(produto) }}
-                            />
-                            <button
-                              onClick={() => handleAdicionarTagUnica(produto)}
-                              className="p-1 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30"
-                            >
-                              <Check size={14} />
-                            </button>
-                            <button
-                              onClick={() => setProdutoEditandoId(null)}
-                              className="p-1 bg-noir-800 text-ivory/40 rounded-lg hover:text-ivory"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => { setProdutoEditandoId(produto.id); setNovaTagUnicaInput('') }}
-                            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-noir-800 text-gold hover:bg-gold/15 border border-gold/20 transition-all inline-flex items-center gap-1"
-                          >
-                            <Plus size={12} />
-                            Adicionar Tag
-                          </button>
-                        )}
                       </td>
                     </tr>
                   )
@@ -605,7 +489,7 @@ export default function GerenciarTags() {
         </div>
       </div>
 
-      {/* Cards Mobile */}
+      {/* Cards Mobile (Escolha Única) */}
       <div className="md:hidden space-y-3">
         {loading ? (
           <div className="p-8 text-center bg-noir-900 rounded-2xl border border-gold/15">
@@ -619,7 +503,7 @@ export default function GerenciarTags() {
         ) : (
           produtosFiltrados.map(produto => {
             const estaSelecionado = selecionados.includes(produto.id)
-            const editandoEstaLinha = produtoEditandoId === produto.id
+            const tagAtual = (produto.tags || [])[0]
 
             return (
               <div
@@ -651,66 +535,29 @@ export default function GerenciarTags() {
                   </div>
                 </div>
 
-                {/* Badges de Tags */}
-                <div className="mb-3 pt-2 border-t border-ivory/5" onClick={e => e.stopPropagation()}>
-                  <div className="flex flex-wrap gap-1.5 items-center">
-                    {(produto.tags || []).length > 0 ? (
-                      produto.tags.map(tag => (
-                        <span
-                          key={tag}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gold/15 text-gold border border-gold/30"
+                {/* Seleção Única da Tag em Mobile */}
+                <div className="pt-2.5 border-t border-ivory/5" onClick={e => e.stopPropagation()}>
+                  <p className="text-[10px] text-ivory/40 uppercase font-accent mb-2">Tag do Produto (Escolha única)</p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {TAGS_OFICIAIS.map(tagOficial => {
+                      const ativa = tagAtual && tagAtual.toLowerCase() === tagOficial.toLowerCase()
+                      return (
+                        <button
+                          key={tagOficial}
+                          type="button"
+                          onClick={() => toggleTagProdutoUnico(produto, tagOficial)}
+                          className={`px-2 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-between ${
+                            ativa
+                              ? 'bg-gold text-noir-950 font-bold'
+                              : 'bg-noir-800/80 text-ivory/40 border border-ivory/5'
+                          }`}
                         >
-                          <span>{tag}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoverTagUnica(produto, tag)}
-                            className="text-gold/60 hover:text-red-400"
-                          >
-                            <X size={12} />
-                          </button>
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-ivory/25 text-[11px] italic">Sem tags ativas</span>
-                    )}
+                          <span className="truncate">{tagOficial}</span>
+                          {ativa && <Check size={12} className="flex-shrink-0" />}
+                        </button>
+                      )
+                    })}
                   </div>
-                </div>
-
-                {/* Adicionar Tag Rápida Mobile */}
-                <div className="pt-2 border-t border-ivory/5 flex justify-end" onClick={e => e.stopPropagation()}>
-                  {editandoEstaLinha ? (
-                    <div className="flex items-center gap-1.5 w-full">
-                      <input
-                        type="text"
-                        placeholder="Nome da tag..."
-                        value={novaTagUnicaInput}
-                        onChange={e => setNovaTagUnicaInput(e.target.value)}
-                        className="flex-1 px-2.5 py-1.5 rounded-lg text-xs text-ivory bg-noir-800 border border-gold/30 focus:outline-none"
-                        autoFocus
-                      />
-                      <button
-                        onClick={() => handleAdicionarTagUnica(produto)}
-                        className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg"
-                      >
-                        <Check size={14} />
-                      </button>
-                      <button
-                        onClick={() => setProdutoEditandoId(null)}
-                        className="p-1.5 bg-noir-800 text-ivory/40 rounded-lg"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => { setProdutoEditandoId(produto.id); setNovaTagUnicaInput('') }}
-                      className="px-3 py-1 rounded-lg text-xs font-semibold bg-noir-800 text-gold border border-gold/20 flex items-center gap-1"
-                    >
-                      <Plus size={12} />
-                      Adicionar Tag
-                    </button>
-                  )}
                 </div>
               </div>
             )
