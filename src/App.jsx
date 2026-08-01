@@ -15,6 +15,7 @@ import MarcasAdmin from './pages/admin/MarcasAdmin'
 import PromocoesEmMassa from './pages/admin/PromocoesEmMassa'
 import Configuracoes from './pages/admin/Configuracoes'
 import AdminLayout from './components/layout/AdminLayout'
+import PromptInstalacaoPWA from './components/ui/PromptInstalacaoPWA'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -30,6 +31,7 @@ function PublicLayout({ children }) {
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
+      <PromptInstalacaoPWA />
     </div>
   )
 }

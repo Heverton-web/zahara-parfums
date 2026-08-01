@@ -14,11 +14,84 @@
     <!-- Premium Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
     
+    <!-- PWA & Mobile Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#0d0d0d" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Zahara" />
+    <link rel="apple-touch-icon" href="/pwa-192x192.png" />
+
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E✦%3C/text%3E%3C/svg%3E">
   </head>
   <body class="bg-noir-950 text-ivory font-sans">
-    <div id="root"></div>
+    <div id="root">
+      <!-- Splash Screen Inicial do App -->
+      <div style="
+        position: fixed;
+        inset: 0;
+        background-color: #0d0d0d;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        font-family: 'Cinzel', 'Inter', sans-serif;
+      ">
+        <!-- Logo Icon -->
+        <div style="
+          width: 76px;
+          height: 76px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, rgba(201, 168, 76, 0.15), rgba(201, 168, 76, 0.05));
+          border: 1px solid rgba(201, 168, 76, 0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 20px;
+          box-shadow: 0 0 35px rgba(201, 168, 76, 0.18);
+        ">
+          <span style="color: #c9a84c; font-size: 36px;">✦</span>
+        </div>
+
+        <!-- Nome da Marca -->
+        <h1 style="
+          font-size: 28px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          background: linear-gradient(135deg, #c9a84c 0%, #e8d5a3 50%, #c9a84c 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin: 0 0 4px 0;
+        ">
+          Zahara
+        </h1>
+        <p style="
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.35em;
+          color: rgba(201, 168, 76, 0.6);
+          margin: 0 0 36px 0;
+        ">
+          Parfums
+        </p>
+
+        <!-- Spinner Dots Loading -->
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 8px; height: 8px; border-radius: 50%; background-color: #c9a84c; animation: pwaPulse 1.2s infinite ease-in-out 0s;"></div>
+          <div style="width: 8px; height: 8px; border-radius: 50%; background-color: #c9a84c; animation: pwaPulse 1.2s infinite ease-in-out 0.2s;"></div>
+          <div style="width: 8px; height: 8px; border-radius: 50%; background-color: #c9a84c; animation: pwaPulse 1.2s infinite ease-in-out 0.4s;"></div>
+        </div>
+
+        <style>
+          @keyframes pwaPulse {
+            0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
+            40% { opacity: 1; transform: scale(1.25); }
+          }
+        </style>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
