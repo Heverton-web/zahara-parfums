@@ -114,26 +114,26 @@ export default function Loja() {
         </div>
 
         {/* ── BOTÕES / CARDS DE ATALHO PARA ROTAS EXCLUSIVAS COM GRADIENTE PREMIUM ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8 sm:mb-12">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-8 sm:mb-12">
           {atalhosCategorias.map(cat => (
             <Link
               key={cat.to}
               to={cat.to}
-              className={`p-4 sm:p-5 rounded-2xl ${cat.bgGradient} border ${cat.borderColor} transition-all duration-500 hover:scale-[1.03] group shadow-xl flex flex-col justify-between`}
+              className={`p-3 sm:p-5 rounded-2xl ${cat.bgGradient} border ${cat.borderColor} transition-all duration-500 hover:scale-[1.03] group shadow-xl flex flex-col justify-between overflow-hidden`}
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className={`p-2 rounded-xl bg-noir-950/80 border border-ivory/10 group-hover:bg-noir-950 ${cat.colorText}`}>
-                  <cat.Icone size={18} />
+              <div className="flex items-center justify-between mb-2.5 sm:mb-3">
+                <div className={`p-1.5 sm:p-2 rounded-xl bg-noir-950/80 border border-ivory/10 group-hover:bg-noir-950 ${cat.colorText}`}>
+                  <cat.Icone size={16} className="sm:w-4 sm:h-4" />
                 </div>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border backdrop-blur-sm ${cat.bgBadge}`}>
+                <span className={`px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold border backdrop-blur-sm whitespace-nowrap flex-shrink-0 ${cat.bgBadge}`}>
                   {cat.count} {cat.count === 1 ? 'item' : 'itens'}
                 </span>
               </div>
 
               <div>
-                <h3 className={`font-semibold text-sm leading-snug group-hover:underline ${cat.colorText} flex items-center justify-between`}>
-                  <span>{cat.label}</span>
-                  <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                <h3 className={`font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight group-hover:underline ${cat.colorText} flex items-center justify-between gap-1 overflow-hidden`}>
+                  <span className="whitespace-nowrap truncate">{cat.label}</span>
+                  <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 hidden sm:inline" />
                 </h3>
               </div>
             </Link>

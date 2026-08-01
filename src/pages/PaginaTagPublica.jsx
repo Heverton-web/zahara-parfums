@@ -1,6 +1,7 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useProdutos, useMarcas } from '../hooks/useProdutos'
-import { Search, X, SlidersHorizontal, Gem } from 'lucide-react'
+import { Search, X, SlidersHorizontal, Gem, ArrowLeft, Store } from 'lucide-react'
 import Select from '../components/ui/Select'
 import ListaProdutos from '../components/product/ListaProdutos'
 
@@ -81,12 +82,32 @@ export default function PaginaTagPublica({ tagNome, titulo, subtitulo, Icone, va
 
   return (
     <div className="min-h-screen bg-noir-950 pt-20 sm:pt-24 pb-16 relative overflow-hidden">
-      {/* Banner / Glow de Fundo Temático */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-b from-noir-900 to-transparent opacity-80 pointer-events-none" />
-      <div className={`absolute top-10 left-1/2 -translate-x-1/2 w-[600px] h-[250px] ${estilo.bgGlow} rounded-full blur-[140px] pointer-events-none`} />
+      {/* Glow de Fundo Temático Orgânico e Fluido */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[400px] pointer-events-none overflow-hidden">
+        <div className={`absolute -top-24 left-1/2 -translate-x-1/2 w-[800px] h-[350px] ${estilo.bgGlow} rounded-full blur-[160px] opacity-60`} />
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
         
+        {/* Barra de Atalhos de Voltar no Topo */}
+        <div className="flex items-center justify-between mb-4">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-ivory/60 hover:text-gold transition-colors py-1.5 px-3 rounded-xl bg-noir-900/60 border border-gold/15 hover:border-gold/40"
+          >
+            <ArrowLeft size={14} className="text-gold" />
+            <span>Voltar para a Home</span>
+          </Link>
+
+          <Link
+            to="/loja"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-gold/80 hover:text-gold transition-colors py-1.5 px-3 rounded-xl bg-gold/5 border border-gold/20 hover:border-gold/40"
+          >
+            <Store size={14} />
+            <span>Ver Catálogo Geral</span>
+          </Link>
+        </div>
+
         {/* Header da Categoria Temática */}
         <div className="text-center my-8 sm:my-12">
           <div
