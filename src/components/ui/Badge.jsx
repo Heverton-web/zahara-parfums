@@ -27,7 +27,7 @@ export default function Badge({ children, variant = 'default', className = '' })
 
   return (
     <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider badge-pulse ${variants[variant]} ${className}`}
+      className={`inline-flex items-center whitespace-nowrap flex-shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider badge-pulse ${variants[variant]} ${className}`}
       style={{
         border: `1px solid ${borderColors[variant]}`,
         boxShadow: glows[variant] || 'none',

@@ -63,9 +63,9 @@ export default function CardProduto({ produto }) {
                 ? ['SUPER PROMOÇÃO']
                 : (produto.tags || []).filter(t => t !== 'SUPER PROMOÇÃO')
               return tagsVisiveis.length > 0 ? (
-                <div className="absolute top-3 left-3 flex gap-1.5 z-10">
+                <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 flex gap-1.5 z-10 max-w-[calc(100%-20px)] flex-wrap sm:flex-nowrap">
                   {tagsVisiveis.slice(0, 2).map((tag) => (
-                    <Badge key={tag} variant={tagColors[tag] || 'default'} className="px-2.5 py-1 backdrop-blur-sm">
+                    <Badge key={tag} variant={tagColors[tag] || 'default'} className="px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[11px] whitespace-nowrap flex-shrink-0 backdrop-blur-sm">
                       {tag}
                     </Badge>
                   ))}
