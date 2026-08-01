@@ -4,16 +4,20 @@ import { Plus, Tag, Search, Loader2 } from 'lucide-react'
 import Button from '../../components/ui/Button'
 import BulkPromotionModal from '../../components/admin/BulkPromotionModal'
 import BulkPromotionList from '../../components/admin/BulkPromotionList'
+import TabelaProdutosTag from '../../components/admin/TabelaProdutosTag'
 
 export default function PromocoesPadrao() {
   const [promocoes, setPromocoes] = useState([])
+  const [produtosTag, setProdutosTag] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadingProdutosTag, setLoadingProdutosTag] = useState(true)
   const [busca, setBusca] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [promocaoEditando, setPromocaoEditando] = useState(null)
 
   useEffect(() => {
     fetchPromocoes()
+    fetchProdutosTag()
   }, [])
 
   async function fetchPromocoes() {
@@ -38,6 +42,23 @@ export default function PromocoesPadrao() {
       console.error('Erro ao buscar promoções:', err)
     }
     setLoading(false)
+  }
+
+  async function fetchProdutosTag() {
+    setLoadingProdutosTag(true)
+    try {
+      const { data, error } = await supabase
+        .from('produtos')
+        .select('*, marcas(nome)')
+        .eq('ativo', true)
+        .or('tags.cs.{promoção},tags.cs.{Promoção}')
+
+      if (error) throw error
+      setProdutosTag(data || [])
+    } catch (err) {
+      console.warn('Erro ao buscar produtos com a tag Promoção:', err)
+    }
+    setLoadingProdutosTag(false)
   }
 
   function handleNovaPromocao() {
@@ -68,7 +89,6 @@ export default function PromocoesPadrao() {
     if (!window.confirm('Tem certeza que deseja excluir esta Promoção?')) return
 
     try {
-      // 1. Limpar produtos vinculados a esta promoção
       await supabase
         .from('produtos')
         .update({
@@ -78,13 +98,11 @@ export default function PromocoesPadrao() {
         })
         .eq('promocao_em_massa_id', id)
 
-      // 2. Deletar junções
       await supabase
         .from('promocao_em_massa_produtos')
         .delete()
         .eq('promocao_em_massa_id', id)
 
-      // 3. Deletar promoção
       const { error } = await supabase
         .from('promocoes_em_massa')
         .delete()
@@ -92,6 +110,7 @@ export default function PromocoesPadrao() {
 
       if (error) throw error
       fetchPromocoes()
+      fetchProdutosTag()
     } catch (err) {
       console.error('Erro ao excluir promoção:', err)
     }
@@ -135,7 +154,7 @@ export default function PromocoesPadrao() {
         />
       </div>
 
-      {/* Conteúdo */}
+      {/* Conteúdo Campanhas */}
       {loading ? (
         <div className="p-12 text-center">
           <Loader2 size={28} className="animate-spin text-gold/50 mx-auto mb-3" />
@@ -150,11 +169,18 @@ export default function PromocoesPadrao() {
         />
       )}
 
+      {/* Tabela de Produtos vinculados à Tag "Promoção" */}
+      <TabelaProdutosTag
+        tituloTag="Promoção"
+        produtos={produtosTag}
+        loading={loadingProdutosTag}
+      />
+
       {/* Modal */}
       <BulkPromotionModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSuccess={fetchPromocoes}
+        onSuccess={() => { fetchPromocoes(); fetchProdutosTag(); }}
         promocao={promocaoEditando}
         defaultTag="PROMOÇÃO"
       />

@@ -2,19 +2,22 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { Plus, Flame, Search, Loader2 } from 'lucide-react'
 import Button from '../../components/ui/Button'
-import Badge from '../../components/ui/Badge'
 import BulkPromotionModal from '../../components/admin/BulkPromotionModal'
 import BulkPromotionList from '../../components/admin/BulkPromotionList'
+import TabelaProdutosTag from '../../components/admin/TabelaProdutosTag'
 
 export default function OfertasRelampago() {
   const [promocoes, setPromocoes] = useState([])
+  const [produtosTag, setProdutosTag] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadingProdutosTag, setLoadingProdutosTag] = useState(true)
   const [busca, setBusca] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [promocaoEditando, setPromocaoEditando] = useState(null)
 
   useEffect(() => {
     fetchPromocoes()
+    fetchProdutosTag()
   }, [])
 
   async function fetchPromocoes() {
@@ -38,6 +41,23 @@ export default function OfertasRelampago() {
       console.error('Erro ao buscar ofertas relâmpago:', err)
     }
     setLoading(false)
+  }
+
+  async function fetchProdutosTag() {
+    setLoadingProdutosTag(true)
+    try {
+      const { data, error } = await supabase
+        .from('produtos')
+        .select('*, marcas(nome)')
+        .eq('ativo', true)
+        .or('tags.cs.{OFERTA RELÂMPAGO},tags.cs.{Oferta Relâmpago}')
+
+      if (error) throw error
+      setProdutosTag(data || [])
+    } catch (err) {
+      console.warn('Erro ao buscar produtos da tag Oferta Relâmpago:', err)
+    }
+    setLoadingProdutosTag(false)
   }
 
   function handleNovaPromocao() {
@@ -68,7 +88,6 @@ export default function OfertasRelampago() {
     if (!window.confirm('Tem certeza que deseja excluir esta Oferta Relâmpago?')) return
 
     try {
-      // 1. Limpar produtos vinculados a esta promoção
       await supabase
         .from('produtos')
         .update({
@@ -78,13 +97,11 @@ export default function OfertasRelampago() {
         })
         .eq('promocao_em_massa_id', id)
 
-      // 2. Deletar junções
       await supabase
         .from('promocao_em_massa_produtos')
         .delete()
         .eq('promocao_em_massa_id', id)
 
-      // 3. Deletar promoção
       const { error } = await supabase
         .from('promocoes_em_massa')
         .delete()
@@ -92,6 +109,7 @@ export default function OfertasRelampago() {
 
       if (error) throw error
       fetchPromocoes()
+      fetchProdutosTag()
     } catch (err) {
       console.error('Erro ao excluir oferta relâmpago:', err)
     }
@@ -135,7 +153,7 @@ export default function OfertasRelampago() {
         />
       </div>
 
-      {/* Conteúdo */}
+      {/* Conteúdo Campanhas */}
       {loading ? (
         <div className="p-12 text-center">
           <Loader2 size={28} className="animate-spin text-red-400 mx-auto mb-3" />
@@ -150,11 +168,18 @@ export default function OfertasRelampago() {
         />
       )}
 
+      {/* Tabela de Produtos vinculados à Tag "Oferta Relâmpago" */}
+      <TabelaProdutosTag
+        tituloTag="Oferta Relâmpago"
+        produtos={produtosTag}
+        loading={loadingProdutosTag}
+      />
+
       {/* Modal */}
       <BulkPromotionModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSuccess={fetchPromocoes}
+        onSuccess={() => { fetchPromocoes(); fetchProdutosTag(); }}
         promocao={promocaoEditando}
         isRelampago={true}
       />

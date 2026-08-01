@@ -5,10 +5,13 @@ import Button from '../../components/ui/Button'
 import Badge from '../../components/ui/Badge'
 import ConfirmDialog from '../../components/ui/ConfirmDialog'
 import BulkPromotionModal from '../../components/admin/BulkPromotionModal'
+import TabelaProdutosTag from '../../components/admin/TabelaProdutosTag'
 
 export default function PromocoesEmMassa() {
   const [promocoes, setPromocoes] = useState([])
+  const [produtosTag, setProdutosTag] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadingProdutosTag, setLoadingProdutosTag] = useState(true)
   const [busca, setBusca] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [promoEditando, setPromoEditando] = useState(null)
@@ -19,7 +22,25 @@ export default function PromocoesEmMassa() {
 
   useEffect(() => {
     fetchPromocoes()
+    fetchProdutosTag()
   }, [])
+
+  async function fetchProdutosTag() {
+    setLoadingProdutosTag(true)
+    try {
+      const { data, error } = await supabase
+        .from('produtos')
+        .select('*, marcas(nome)')
+        .eq('ativo', true)
+        .or('tags.cs.{SUPER PROMOÇÃO},tags.cs.{Super Promoção}')
+
+      if (error) throw error
+      setProdutosTag(data || [])
+    } catch (err) {
+      console.warn('Erro ao buscar produtos da tag Super Promoção:', err)
+    }
+    setLoadingProdutosTag(false)
+  }
 
   async function fetchPromocoes() {
     setLoading(true)
@@ -397,12 +418,20 @@ export default function PromocoesEmMassa() {
         )}
       </div>
 
+      {/* Tabela de Produtos vinculados à Tag "Super Promoção" */}
+      <TabelaProdutosTag
+        tituloTag="Super Promoção"
+        produtos={produtosTag}
+        loading={loadingProdutosTag}
+      />
+
       {/* Modal */}
       <BulkPromotionModal
         isOpen={modalOpen}
         onClose={() => { setModalOpen(false); setPromoEditando(null) }}
-        onSuccess={handleSuccess}
+        onSuccess={() => { handleSuccess(); fetchProdutosTag(); }}
         promocao={promoEditando}
+        defaultTag="SUPER PROMOÇÃO"
       />
 
       {/* Confirm Delete */}
