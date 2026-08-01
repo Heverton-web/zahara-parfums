@@ -8,9 +8,16 @@ import { buildWhatsAppLink } from '../../lib/whatsapp'
 
 const tagColors = {
   'lançamento': 'gold',
+  'lançamentos': 'gold',
   'promoção': 'wine',
   'oferta relâmpago': 'danger',
-  'SUPER PROMOÇÃO': 'danger',
+  'super promoção': 'gold',
+}
+
+function getTagVariant(tag) {
+  if (!tag) return 'default'
+  const key = String(tag).toLowerCase().trim()
+  return tagColors[key] || 'default'
 }
 
 export default function CardProduto({ produto }) {
@@ -61,11 +68,11 @@ export default function CardProduto({ produto }) {
               const emMassa = produto.em_promocao_em_massa && produto.promocoes_em_massa?.data_fim && new Date(produto.promocoes_em_massa.data_fim) > new Date()
               const tagsVisiveis = emMassa
                 ? ['SUPER PROMOÇÃO']
-                : (produto.tags || []).filter(t => t !== 'SUPER PROMOÇÃO')
+                : (produto.tags || [])
               return tagsVisiveis.length > 0 ? (
                 <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 flex gap-1.5 z-10 max-w-[calc(100%-20px)] flex-wrap sm:flex-nowrap">
                   {tagsVisiveis.slice(0, 2).map((tag) => (
-                    <Badge key={tag} variant={tagColors[tag] || 'default'} className="px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[11px] whitespace-nowrap flex-shrink-0 backdrop-blur-sm">
+                    <Badge key={tag} variant={getTagVariant(tag)} className="px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[11px] whitespace-nowrap flex-shrink-0 backdrop-blur-sm">
                       {tag}
                     </Badge>
                   ))}
