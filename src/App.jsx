@@ -3,8 +3,10 @@ import { useEffect } from 'react'
 import { AuthProvider } from './hooks/useAuth'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
+import { Flame, Sparkles, Tag } from 'lucide-react'
 import Home from './pages/Home'
 import Loja from './pages/Loja'
+import PaginaTagPublica from './pages/PaginaTagPublica'
 import Produto from './pages/Produto'
 import Marcas from './pages/Marcas'
 import NotFound from './pages/NotFound'
@@ -46,11 +48,17 @@ function App() {
       <ScrollToTop />
       <AuthProvider>
         <Routes>
-          {/* Rotas públicas */}
+          {/* Rotas públicas gerais */}
           <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
           <Route path="/loja" element={<PublicLayout><Loja /></PublicLayout>} />
           <Route path="/produto/:id" element={<PublicLayout><Produto /></PublicLayout>} />
           <Route path="/marcas" element={<PublicLayout><Marcas /></PublicLayout>} />
+
+          {/* Rotas públicas exclusivas por tag */}
+          <Route path="/ofertas-relampago" element={<PublicLayout><PaginaTagPublica tagNome="Oferta Relâmpago" titulo="Ofertas Relâmpago" subtitulo="Preços expressos com temporizador de contagem regressiva" Icone={Flame} variante="carmesim" /></PublicLayout>} />
+          <Route path="/super-promocoes" element={<PublicLayout><PaginaTagPublica tagNome="Super Promoção" titulo="Super Promoções" subtitulo="Nossos descontos mais expressivos selecionados a dedo" Icone={Sparkles} variante="ouro" /></PublicLayout>} />
+          <Route path="/promocoes" element={<PublicLayout><PaginaTagPublica tagNome="Promoção" titulo="Promoções" subtitulo="Oportunidades especiais de perfumaria fina" Icone={Tag} variante="esmeralda" /></PublicLayout>} />
+          <Route path="/lancamentos" element={<PublicLayout><PaginaTagPublica tagNome="Lançamentos" titulo="Lançamentos" subtitulo="As novidades mais desejadas direto do Oriente" Icone={Sparkles} variante="safira" /></PublicLayout>} />
 
           {/* Rotas admin */}
           <Route path="/admin/login" element={<Login />} />

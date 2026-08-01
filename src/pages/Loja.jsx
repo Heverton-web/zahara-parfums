@@ -1,9 +1,9 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useProdutos, useMarcas } from '../hooks/useProdutos'
-import { Gem, SlidersHorizontal, X, Flame, Sparkles, Tag, Crown } from 'lucide-react'
+import { Gem, SlidersHorizontal, X, Flame, Sparkles, Tag, Crown, ArrowRight } from 'lucide-react'
 import Filtros from '../components/product/Filtros'
 import ListaProdutos from '../components/product/ListaProdutos'
-import SecaoCarrosselProduto from '../components/product/SecaoCarrosselProduto'
 
 export default function Loja() {
   const [filtros, setFiltros] = useState({ busca: '', genero: '', marca: '', tag: '' })
@@ -15,107 +15,128 @@ export default function Loja() {
     setFiltros((prev) => ({ ...prev, [campo]: valor }))
   }
 
-  // Filtragem dinâmica dos produtos
+  // Filtragem dinâmica dos produtos no catálogo geral
   const produtosFiltrados = produtos.filter(p => {
-    // 1. Busca por nome
     const combinaBusca = !filtros.busca || p.nome.toLowerCase().includes(filtros.busca.toLowerCase())
-
-    // 2. Gênero
     const combinaGenero = !filtros.genero || p.genero?.toLowerCase() === filtros.genero.toLowerCase()
-
-    // 3. Marca
     const combinaMarca = !filtros.marca || String(p.marca_id) === String(filtros.marca)
-
-    // 4. Tag
     const combinaTag = !filtros.tag || (p.tags || []).some(t => t.toLowerCase() === filtros.tag.toLowerCase()) ||
       (p.em_promocao_em_massa && p.promocoes_em_massa?.tag?.toLowerCase().includes(filtros.tag.toLowerCase()))
 
     return combinaBusca && combinaGenero && combinaMarca && combinaTag
   })
 
-  // Ordenação obrigatória A-Z pelo nome
+  // Ordenação de A a Z pelo nome
   const produtosOrdenadosAZ = [...produtosFiltrados].sort((a, b) =>
     a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' })
   )
 
-  // As 4 listas específicas para os Carrosséis Temáticos Horizontais
-  const ofertasRelampago = produtos.filter(p =>
+  // Contadores dinâmicos para os botões de atalho das 4 seções
+  const countRelampago = produtos.filter(p =>
     (p.tags || []).some(t => t.toLowerCase() === 'oferta relâmpago') ||
     (p.em_promocao_em_massa && p.promocoes_em_massa?.tag?.toLowerCase().includes('relâmpago'))
-  )
+  ).length
 
-  const superPromocoes = produtos.filter(p =>
+  const countSuperPromo = produtos.filter(p =>
     (p.tags || []).some(t => t.toLowerCase() === 'super promoção') ||
     (p.em_promocao_em_massa && p.promocoes_em_massa?.tag?.toLowerCase().includes('super'))
-  )
+  ).length
 
-  const promocoes = produtos.filter(p =>
+  const countPromocoes = produtos.filter(p =>
     (p.tags || []).some(t => t.toLowerCase() === 'promoção') ||
     (p.em_promocao_em_massa && p.promocoes_em_massa?.tag?.toLowerCase() === 'promoção')
-  )
+  ).length
 
-  const lancamentos = produtos.filter(p =>
+  const countLancamentos = produtos.filter(p =>
     (p.tags || []).some(t => t.toLowerCase().includes('lançamento'))
-  )
+  ).length
 
   const activeFiltersCount = Object.values(filtros).filter(Boolean).length
 
+  const atalhosCategorias = [
+    {
+      to: '/ofertas-relampago',
+      label: 'Ofertas Relâmpago',
+      count: countRelampago,
+      Icone: Flame,
+      colorText: 'text-red-400',
+      borderHover: 'hover:border-red-500/40',
+      bgBadge: 'bg-red-500/10 text-red-400 border-red-500/30',
+    },
+    {
+      to: '/super-promocoes',
+      label: 'Super Promoções',
+      count: countSuperPromo,
+      Icone: Sparkles,
+      colorText: 'text-gold',
+      borderHover: 'hover:border-gold/40',
+      bgBadge: 'bg-gold/10 text-gold border-gold/30',
+    },
+    {
+      to: '/promocoes',
+      label: 'Promoções',
+      count: countPromocoes,
+      Icone: Tag,
+      colorText: 'text-emerald-400',
+      borderHover: 'hover:border-emerald-500/40',
+      bgBadge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+    },
+    {
+      to: '/lancamentos',
+      label: 'Lançamentos',
+      count: countLancamentos,
+      Icone: Sparkles,
+      colorText: 'text-indigo-300',
+      borderHover: 'hover:border-indigo-400/40',
+      bgBadge: 'bg-indigo-500/10 text-indigo-300 border-indigo-400/30',
+    },
+  ]
+
   return (
     <div className="min-h-screen bg-noir-950 pt-20 sm:pt-24 pb-16">
-      
-      {/* ── 4 CARROSSÉIS TEMÁTICOS HORIZONTAIS POR TAG (Aparecem no topo da loja) ── */}
-      {!filtros.busca && !filtros.genero && !filtros.marca && !filtros.tag && (
-        <div className="space-y-4 mb-8">
-          {/* 1. Ofertas Relâmpago (Carmesim & Fogo) */}
-          <SecaoCarrosselProduto
-            titulo="Ofertas Relâmpago"
-            subtitulo="Descontos expressos com temporizador de contagem regressiva"
-            badgeText="Oferta Relâmpago"
-            Icone={Flame}
-            variante="carmesim"
-            produtos={ofertasRelampago}
-            loading={loading}
-          />
-
-          {/* 2. Super Promoções (Ouro Âmbar) */}
-          <SecaoCarrosselProduto
-            titulo="Super Promoções"
-            subtitulo="Os maiores descontos selecionados da perfumaria fina"
-            badgeText="Super Promoção"
-            Icone={Sparkles}
-            variante="ouro"
-            produtos={superPromocoes}
-            loading={loading}
-          />
-
-          {/* 3. Promoções (Verde Esmeralda) */}
-          <SecaoCarrosselProduto
-            titulo="Promoções"
-            subtitulo="Preços especiais e oportunidades exclusivas"
-            badgeText="Promoção"
-            Icone={Tag}
-            variante="esmeralda"
-            produtos={promocoes}
-            loading={loading}
-          />
-
-          {/* 4. Lançamentos (Azul Safira Nuit) */}
-          <SecaoCarrosselProduto
-            titulo="Lançamentos"
-            subtitulo="As novidades importadas mais recentes do Oriente"
-            badgeText="Lançamentos"
-            Icone={Sparkles}
-            variante="safira"
-            produtos={lancamentos}
-            loading={loading}
-          />
-        </div>
-      )}
-
-      {/* ── SEÇÃO DE CATALOGO GERAL & FILTROS ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        
-        {/* Toggle Filtros no Mobile */}
+
+        {/* Header Principal da Loja */}
+        <div className="text-center my-6 sm:my-10">
+          <p className="font-accent text-gold/60 text-[11px] uppercase tracking-[0.4em] mb-2">
+            Zahara Parfums
+          </p>
+          <h1 className="font-heading text-3xl sm:text-5xl font-bold text-ivory mb-3">
+            Catálogo de <span className="text-gradient-gold">Alta Perfumaria</span>
+          </h1>
+          <p className="font-display text-ivory/40 italic text-sm sm:text-base max-w-xl mx-auto">
+            Explore nossas coleções exclusivas e encontre a essência perfeita.
+          </p>
+        </div>
+
+        {/* ── BOTÕES / CARDS DE ATALHO PARA ROTAS EXCLUSIVAS COM CONTADORES ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8 sm:mb-12">
+          {atalhosCategorias.map(cat => (
+            <Link
+              key={cat.to}
+              to={cat.to}
+              className={`p-4 rounded-2xl bg-noir-900 border border-gold/15 transition-all duration-300 hover:scale-[1.02] ${cat.borderHover} group shadow-lg flex flex-col justify-between`}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className={`p-2 rounded-xl bg-noir-800 border border-ivory/5 group-hover:bg-noir-950 ${cat.colorText}`}>
+                  <cat.Icone size={18} />
+                </div>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${cat.bgBadge}`}>
+                  {cat.count} {cat.count === 1 ? 'item' : 'itens'}
+                </span>
+              </div>
+
+              <div>
+                <h3 className={`font-semibold text-sm leading-snug group-hover:underline ${cat.colorText} flex items-center justify-between`}>
+                  <span>{cat.label}</span>
+                  <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                </h3>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* Toggle Filtros Mobile */}
         <div className="sm:hidden mb-4">
           <button
             onClick={() => setShowFilters(!showFilters)}
